@@ -63,7 +63,7 @@
     
   <div class="cover-frame">
     <div class="bg-box">
-      <img src="/images/cover8.jpg" alt="image frame" />
+      <img src="/images/cover8.png" alt="image frame" />
     </div>
     <div class="cover-inner text-center text-white">
       <h1><a href="/">心向天空</a></h1>
@@ -187,24 +187,11 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="LOAM-Livox"><a href="#LOAM-Livox" class="headerlink" title="LOAM-Livox"></a>LOAM-Livox</h1><p><strong>Loam-Livox是用于</strong><a target="_blank" rel="noopener" href="https://www.livoxtech.com/"><em>Livox 激光</em></a>雷达的稳健、低漂移和实时里程计和测绘软件包，是专为大规模工业用途而设计的低成本和高性能激光雷达。我们的软件包解决了许多关键问题：在非常有限的 FOV 中进行特征提取和选择、鲁棒的异常值抑制、移动对象过滤和运动失真补偿。此外，我们还集成了其他功能，如可并行管道、使用单元格和地图的点云管理、闭环、地图保存和重新加载实用程序</p>
-<h2 id="1-软件库"><a href="#1-软件库" class="headerlink" title="1.软件库"></a>1.软件库</h2><ul>
-<li><h3 id="ceres-1-14"><a href="#ceres-1-14" class="headerlink" title="ceres 1.14"></a>ceres 1.14</h3></li>
-<li><h3 id="pcl-1-9"><a href="#pcl-1-9" class="headerlink" title="pcl 1.9"></a>pcl 1.9</h3></li>
-<li><h3 id="vtk-8-2-0"><a href="#vtk-8-2-0" class="headerlink" title="vtk 8.2.0"></a>vtk 8.2.0</h3></li>
-</ul>
-<h2 id="2-构建"><a href="#2-构建" class="headerlink" title="2.构建"></a>2.构建</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd ~/catkin_ws/src</span><br><span class="line">git clone https://github.com/hku-mars/loam_livox.git</span><br><span class="line">cd ../</span><br><span class="line">catkin_make</span><br><span class="line">source ~/catkin_ws/devel/setup.bash</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-录制bag包"><a href="#3-录制bag包" class="headerlink" title="3.录制bag包"></a>3.录制bag包</h2><p>因为需要装很多库，所以没有在松灵小车上运行，而是先在小车上录制bag包，然后在PC端运行。</p>
-<p>3.1 运行livox雷达</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">roslaunch livox_ros_driver livox_lidar_rviz.launch</span><br></pre></td></tr></table></figure>
-
-<p>3.2 录制bag包</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosbag record /livox/lidar</span><br></pre></td></tr></table></figure>
-
-<h2 id="4-播放bag"><a href="#4-播放bag" class="headerlink" title="4.播放bag"></a>4.播放bag</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">roslaunch loam_livox rosbag.launch</span><br><span class="line">rosbag play YOUR_DOWNLOADED.bag</span><br><span class="line">#rosbag play loop.bag</span><br></pre></td></tr></table></figure>
-
- 
+  <h1 id="LOAM-Livox"><a href="#LOAM-Livox" class="headerlink" title="LOAM-Livox"></a>LOAM-Livox</h1><p><strong>Loam-Livox是用于</strong><a target="_blank" rel="noopener" href="https://www.livoxtech.com/"><em>Livox 激光</em></a>雷达的稳健、低漂移和实时里程计和测绘软件包，是专为大规模工业用途而设计的低成本和高性能激光雷达。我们的软件包解决了许多关键问题：在非常有限的 FOV 中进行特征提取和选择、鲁棒的异常值抑制、移动对象过滤和运动失真补偿。此外，我们还集成了其他功能，如可并行管道、使用单元格和地图的点云管理、闭环、地图保存和重新加载实用程序</p> 
+      <a class="article-more-link" href="/2023/04/05/LOAM_Livox_runing/"
+        >阅读更多...</a
+      >
+       
       <!-- reward -->
       
     </div>
@@ -253,20 +240,11 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
- 
+  <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p> 
+      <a class="article-more-link" href="/2023/04/04/hello-world/"
+        >阅读更多...</a
+      >
+       
       <!-- reward -->
       
     </div>

@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 
 
-<html lang="en">
+<html lang="zh-Hans">
   
 
     <head>
       <meta charset="utf-8" />
-        
+       
+      <meta name="keywords" content="学习，生活，娱乐" />
+       
+      <meta name="description" content="今天是一个值得记录的日子" />
+      
       <meta
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title> Hexo</title>
+      <title> 心向天空</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -50,21 +54,19 @@
   <div id="app">
     
       
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
     <main class="content on">
       
 <section class="cover">
     
-      
-      <a class="forkMe" href="https://github.com/Shen-Yu/hexo-theme-ayer"
-        target="_blank"><img width="149" height="149" src="/images/forkme.png"
-          class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
-    
   <div class="cover-frame">
     <div class="bg-box">
-      <img src="/images/cover1.jpg" alt="image frame" />
+      <img src="/images/cover8.jpg" alt="image frame" />
     </div>
     <div class="cover-inner text-center text-white">
-      <h1><a href="/">Hexo</a></h1>
+      <h1><a href="/">心向天空</a></h1>
       <div id="subtitle-box">
         
         <span id="subtitle"></span>
@@ -90,7 +92,7 @@
   <script>
     try {
       var typed = new Typed("#subtitle", {
-        strings: ['面朝大海，春暖花开', '愿你一生努力，一生被爱', '想要的都拥有，得不到的都释怀'],
+        strings: ['不要为曾经做过的决定而后悔，因为那是你当时的最优解', '愿你一生努力，一生被爱', '活着就是一件快乐的事'],
         startDelay: 0,
         typeSpeed: 200,
         loop: true,
@@ -104,22 +106,6 @@
   
 <div id="main">
   <section class="outer">
-  
-  <ul class="ads">
-    
-        <li>
-            <a target="_blank" rel="noopener" href="https://curl.qcloud.com/kvO7hb43">
-                <img src="https://pic.imgdb.cn/item/62174b452ab3f51d912a5ccc.jpg" width="300" alt="云服务器限时秒杀">
-            </a>
-        </li>
-    
-        <li>
-            <a target="_blank" rel="noopener" href="https://www.vultr.com/?ref=8630075">
-                <img src="https://pic.imgdb.cn/item/62174b452ab3f51d912a5cd7.png" width="300" alt="vultr优惠vps">
-            </a>
-        </li>
-    
-</ul>
   
   
   
@@ -168,6 +154,76 @@
     
     
     
+    
+    <article
+  id="post-LOAM_Livox_runing"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/05/LOAM_Livox_runing/"
+    >LOAM-Livox运行</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/05/LOAM_Livox_runing/" class="article-date">
+  <time datetime="2023-04-04T16:00:00.000Z" itemprop="datePublished">2023-04-05</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="LOAM-Livox"><a href="#LOAM-Livox" class="headerlink" title="LOAM-Livox"></a>LOAM-Livox</h1><p><strong>Loam-Livox是用于</strong><a target="_blank" rel="noopener" href="https://www.livoxtech.com/"><em>Livox 激光</em></a>雷达的稳健、低漂移和实时里程计和测绘软件包，是专为大规模工业用途而设计的低成本和高性能激光雷达。我们的软件包解决了许多关键问题：在非常有限的 FOV 中进行特征提取和选择、鲁棒的异常值抑制、移动对象过滤和运动失真补偿。此外，我们还集成了其他功能，如可并行管道、使用单元格和地图的点云管理、闭环、地图保存和重新加载实用程序</p>
+<h2 id="1-软件库"><a href="#1-软件库" class="headerlink" title="1.软件库"></a>1.软件库</h2><ul>
+<li><h3 id="ceres-1-14"><a href="#ceres-1-14" class="headerlink" title="ceres 1.14"></a>ceres 1.14</h3></li>
+<li><h3 id="pcl-1-9"><a href="#pcl-1-9" class="headerlink" title="pcl 1.9"></a>pcl 1.9</h3></li>
+<li><h3 id="vtk-8-2-0"><a href="#vtk-8-2-0" class="headerlink" title="vtk 8.2.0"></a>vtk 8.2.0</h3></li>
+</ul>
+<h2 id="2-构建"><a href="#2-构建" class="headerlink" title="2.构建"></a>2.构建</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd ~/catkin_ws/src</span><br><span class="line">git clone https://github.com/hku-mars/loam_livox.git</span><br><span class="line">cd ../</span><br><span class="line">catkin_make</span><br><span class="line">source ~/catkin_ws/devel/setup.bash</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-录制bag包"><a href="#3-录制bag包" class="headerlink" title="3.录制bag包"></a>3.录制bag包</h2><p>因为需要装很多库，所以没有在松灵小车上运行，而是先在小车上录制bag包，然后在PC端运行。</p>
+<p>3.1 运行livox雷达</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">roslaunch livox_ros_driver livox_lidar_rviz.launch</span><br></pre></td></tr></table></figure>
+
+<p>3.2 录制bag包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosbag record /livox/lidar</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-播放bag"><a href="#4-播放bag" class="headerlink" title="4.播放bag"></a>4.播放bag</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">roslaunch loam_livox rosbag.launch</span><br><span class="line">rosbag play YOUR_DOWNLOADED.bag</span><br><span class="line">#rosbag play loop.bag</span><br></pre></td></tr></table></figure>
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
     
     <article
   id="post-hello-world"
@@ -242,7 +298,7 @@
       <li>
         Copyrights &copy;
         2015-2023
-        <i class="ri-heart-fill heart_icon"></i> John Doe
+        <i class="ri-heart-fill heart_icon"></i> thelll
       </li>
     </ul>
     <ul>
@@ -294,7 +350,7 @@
 <nav class="navbar">
   
   <div class="logo">
-    <a href="/"><img src="/images/ayer-side.svg" alt="Hexo"></a>
+    <a href="/"><img src="/images/ayer-side.svg" alt="心向天空"></a>
   </div>
   
   <ul class="nav nav-main">
@@ -313,18 +369,6 @@
     
     <li class="nav-item">
       <a class="nav-item-link" href="/tags">标签</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/tags/%E6%97%85%E8%A1%8C/">旅行</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" target="_blank" rel="noopener" href="http://shenyu-vip.lofter.com">摄影</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友链</a>
     </li>
     
     <li class="nav-item">
@@ -361,19 +405,9 @@
 <!-- #reward -->
 <div id="reward">
   <span class="close"><i class="ri-close-line"></i></span>
-  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <p class="reward-p"><i class="ri-cup-line"></i></p>
   <div class="reward-box">
     
-    <div class="reward-item">
-      <img class="reward-img" src="/images/alipay.jpg">
-      <span class="reward-type">支付宝</span>
-    </div>
-    
-    
-    <div class="reward-item">
-      <img class="reward-img" src="/images/wechat.jpg">
-      <span class="reward-type">微信</span>
-    </div>
     
   </div>
 </div>
@@ -513,7 +547,9 @@
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->
-
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
 <!-- CodeCopy -->
  
 <link rel="stylesheet" href="/css/clipboard.css">

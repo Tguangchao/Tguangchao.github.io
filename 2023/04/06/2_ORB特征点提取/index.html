@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-Hans">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习，生活，娱乐" />
+       
+      <meta name="description" content="今天是一个值得记录的日子" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>（二）ORB特征点提取 |  心向天空</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-2_ORB特征点提取"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  （二）ORB特征点提取
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/06/2_ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/" class="article-date">
+  <time datetime="2023-04-05T16:00:00.000Z" itemprop="datePublished">2023-04-06</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E8%A7%86%E8%A7%89SLAM/">视觉SLAM</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">4.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">18 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="（二）ORB特征点提取"><a href="#（二）ORB特征点提取" class="headerlink" title="（二）ORB特征点提取"></a>（二）ORB特征点提取</h1><span id="more"></span>
+
+<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>在上一章System函数中step2.1.创建tracking线程时，tracking函数的构造函数创建了ORBextractor提取器，ORBextractor的构造函数初始化了图像金字塔。</p>
+<p>system::system() —— mpTracker &#x3D; new Tracking(）—— Tracking::Tracking()</p>
+<p><strong>此函数主要从配置文件中读取相机和ORB特征点的参数并赋值给相应的常量。</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">///构造函数</span></span><br><span class="line">Tracking::<span class="built_in">Tracking</span>()                </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 第一步 从配置文件中加载相机参数</span></span><br><span class="line">    <span class="function">cv::FileStorage <span class="title">fSettings</span><span class="params">(strSettingPath, cv::FileStorage::READ)</span></span>;</span><br><span class="line">    <span class="comment">//构造相机内参矩阵</span></span><br><span class="line">    <span class="comment">//图像矫正系数</span></span><br><span class="line"> 	......</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第二步 加载ORB特征点有关的参数,并新建特征点提取器</span></span><br><span class="line">    <span class="comment">// 每一帧提取的特征点数 1000</span></span><br><span class="line">    <span class="type">int</span> nFeatures = fSettings[<span class="string">&quot;ORBextractor.nFeatures&quot;</span>];</span><br><span class="line">	......</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第三步 tracking过程都会用到mpORBextractorLeft作为特征点提取器</span></span><br><span class="line">    mpORBextractorLeft = <span class="keyword">new</span> <span class="built_in">ORBextractor</span>(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果是双目，tracking过程中还会用用到mpORBextractorRight作为右目特征点提取器</span></span><br><span class="line">    <span class="keyword">if</span>(sensor==System::STEREO)</span><br><span class="line">        mpORBextractorRight = <span class="keyword">new</span> <span class="built_in">ORBextractor</span>(nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在单目初始化的时候，会用mpIniORBextractor来作为特征点提取器</span></span><br><span class="line">    <span class="keyword">if</span>(sensor==System::MONOCULAR)</span><br><span class="line">        mpIniORBextractor = <span class="keyword">new</span> <span class="built_in">ORBextractor</span>(<span class="number">2</span>*nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST); <span class="comment">// 单目相继会提取两倍的特征点</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在上面第三步时会用到ORBextractor类的构造函数ORBextractor()。</p>
+<h2 id="2-ORBextractor构造函数ORBextractor"><a href="#2-ORBextractor构造函数ORBextractor" class="headerlink" title="2. ORBextractor构造函数ORBextractor()"></a>2. ORBextractor构造函数ORBextractor()</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">   * @brief 构造函数</span></span><br><span class="line"><span class="comment">   * @detials 特征点数目不足，那么就降低要求，使用较小FAST响应值阈值进行再次提取，以获得尽可能多的FAST角点。</span></span><br><span class="line"><span class="comment">   * @param[in] nfeatures         指定要提取出来的特征点数目</span></span><br><span class="line"><span class="comment">   * @param[in] scaleFactor       图像金字塔的缩放系数</span></span><br><span class="line"><span class="comment">   * @param[in] nlevels           指定需要提取特征点的图像金字塔层</span></span><br><span class="line"><span class="comment">   * @param[in] iniThFAST         初始的默认FAST响应值阈值</span></span><br><span class="line"><span class="comment">   * @param[in] minThFAST         较小的FAST响应值阈值</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="built_in">ORBextractor</span>(<span class="type">int</span> nfeatures, <span class="type">float</span> scaleFactor, <span class="type">int</span> nlevels, <span class="type">int</span> iniThFAST, <span class="type">int</span> minThFAST);</span><br></pre></td></tr></table></figure>
+
+<p><code>FAST</code>特征点和<code>ORB</code>描述子本身不具有尺度信息，<code>ORBextractor</code>通过构建<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%9B%BE%E5%83%8F%E9%87%91%E5%AD%97%E5%A1%94&spm=1001.2101.3001.7020">图像金字塔</a>来得到特征点尺度信息。将输入图片逐级缩放得到图像金字塔，金字塔层级越高,图片分辨率越低,ORB特征点越大。</p>
+<p><strong>构造函数<code>ORBextractor（）</code>的流程：初始化图像金字塔相关变量——初始化用于计算描述子的pattern——计算近似圆形的边界条件umax。</strong></p>
+<h4 id="2-1-初始化图像金字塔相关变量"><a href="#2-1-初始化图像金字塔相关变量" class="headerlink" title="2.1 初始化图像金字塔相关变量:"></a>2.1 初始化图像金字塔相关变量:</h4><p>下面成员变量从配置文件<code>TUM1.yaml</code>中读入:</p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>成员变量</strong></th>
+<th align="center"><strong>访问控制</strong></th>
+<th align="center"><strong>意义</strong></th>
+<th align="center"><strong>配置文件</strong><code>TUM1.yaml</code><strong>中变量名</strong></th>
+<th align="center"><strong>值</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">int nfeatures</td>
+<td align="center">protected</td>
+<td align="center">所有层级提取到的特征点数之和金字塔层数</td>
+<td align="center">ORBextractor.nFeatures</td>
+<td align="center">1000</td>
+</tr>
+<tr>
+<td align="center">double scaleFactor</td>
+<td align="center">protected</td>
+<td align="center">图像金字塔相邻层级间的缩放系数</td>
+<td align="center">ORBextractor.scaleFactor</td>
+<td align="center">1.2</td>
+</tr>
+<tr>
+<td align="center">int nlevels</td>
+<td align="center">protected</td>
+<td align="center">金字塔层级数</td>
+<td align="center">ORBextractor.nLevels</td>
+<td align="center">8</td>
+</tr>
+<tr>
+<td align="center">int iniThFAST</td>
+<td align="center">protected</td>
+<td align="center">提取特征点的描述子门槛(高)</td>
+<td align="center">ORBextractor.iniThFAST</td>
+<td align="center">20</td>
+</tr>
+<tr>
+<td align="center">int minThFAST</td>
+<td align="center">protected</td>
+<td align="center">提取特征点的描述子门槛(低)</td>
+<td align="center">ORBextractor.minThFAST</td>
+<td align="center">7</td>
+</tr>
+</tbody></table>
+<p>按照图像金字塔的构建方法进行构建</p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/image-20221108152109131.png" alt="image-20221108152109131"></p>
+<p>所以下面截取的部分就是在进行图像金字塔每层该分配多少特征点。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//图片降采样缩放系数的倒数</span></span><br><span class="line">   <span class="type">float</span> factor = <span class="number">1.0f</span> / scaleFactor;</span><br><span class="line"><span class="comment">//第0层图像应该分配的特征点数量</span></span><br><span class="line">   <span class="type">float</span> nDesiredFeaturesPerScale = nfeatures*(<span class="number">1</span> - factor)/(<span class="number">1</span> - (<span class="type">float</span>)<span class="built_in">pow</span>((<span class="type">double</span>)factor, (<span class="type">double</span>)nlevels));</span><br><span class="line"></span><br><span class="line"><span class="comment">//用于在特征点个数分配的，特征点的累计计数清空</span></span><br><span class="line">   <span class="type">int</span> sumFeatures = <span class="number">0</span>;</span><br><span class="line"><span class="comment">//开始逐层计算要分配的特征点个数，顶层图像除外（看循环后面）</span></span><br><span class="line">   <span class="keyword">for</span>( <span class="type">int</span> level = <span class="number">0</span>; level &lt; nlevels<span class="number">-1</span>; level++ )</span><br><span class="line">   &#123;</span><br><span class="line">	<span class="comment">//分配 cvRound : 返回个参数最接近的整数值</span></span><br><span class="line">       mnFeaturesPerLevel[level] = <span class="built_in">cvRound</span>(nDesiredFeaturesPerScale);</span><br><span class="line">	<span class="comment">//累计</span></span><br><span class="line">       sumFeatures += mnFeaturesPerLevel[level];</span><br><span class="line">	<span class="comment">//乘系数</span></span><br><span class="line">       nDesiredFeaturesPerScale *= factor;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//由于前面的特征点个数取整操作，可能会导致剩余一些特征点个数没有被分配，所以这里就将这个余出来的特征点分配到最高的图层中</span></span><br><span class="line">   mnFeaturesPerLevel[nlevels<span class="number">-1</span>] = std::<span class="built_in">max</span>(nfeatures - sumFeatures, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<table>
+<thead>
+<tr>
+<th align="center">成员变量</th>
+<th align="center">访问控制</th>
+<th align="center">意义</th>
+<th align="center">值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">std::vector<int>mnFeaturesPerLevel</td>
+<td align="center">protected</td>
+<td align="center">金字塔每层级中提取的特征点数正比于图层边长,总和为nfeatures</td>
+<td align="center">{217, 180, 150, 125, 104, 87, 72, 65}</td>
+</tr>
+<tr>
+<td align="center">std::vector<float>mvScaleFactor</td>
+<td align="center">protected</td>
+<td align="center">各层级的缩放系数</td>
+<td align="center">{1, 1.2, 1.44, 1.728, 2.074, 2.488,2.986, 3.583}</td>
+</tr>
+<tr>
+<td align="center">std::vector<float>mvInvScaleFactor</td>
+<td align="center">protected</td>
+<td align="center">各层级缩放系数的倒数</td>
+<td align="center">{1, 0.833, 0.694, 0.579, 0.482,0.402, 0.335, 0.2791}</td>
+</tr>
+<tr>
+<td align="center">std::vector<float>mvLevelSigma2</td>
+<td align="center">protected</td>
+<td align="center">各层级缩放系数的平方</td>
+<td align="center">{1, 1.44, 2.074, 2.986, 4.300, 6.190,8.916, 12.838}</td>
+</tr>
+<tr>
+<td align="center">std::vector<float>mvInvLevelSigma2</td>
+<td align="center">protected</td>
+<td align="center">各层级缩放系数的平方倒数</td>
+<td align="center">{1, 0.694, 0.482, 0.335, 0.233, 0.162, 0.112, 0.078}</td>
+</tr>
+</tbody></table>
+<h4 id="2-2-初始化用于计算描述子的pattern变量"><a href="#2-2-初始化用于计算描述子的pattern变量" class="headerlink" title="2.2 初始化用于计算描述子的pattern变量"></a>2.2 初始化用于计算描述子的<code>pattern</code>变量</h4><p><code>pattern</code>是用于计算描述子的<code>256</code>对坐标，其值写死在源码文件<code>ORBextractor.cc</code>里，在构造函数里做类型转换将其转换为<code>const cv::Point*</code>变量。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> bit_pattern_31_[<span class="number">256</span>*<span class="number">4</span>] =&#123;</span><br><span class="line">    <span class="number">8</span>,<span class="number">-3</span>, <span class="number">9</span>,<span class="number">5</span><span class="comment">/*mean (0), correlation (0)*/</span>,	</span><br><span class="line">    <span class="number">4</span>,<span class="number">2</span>, <span class="number">7</span>,<span class="number">-12</span><span class="comment">/*mean (1.12461e-05), correlation (0.0437584)*/</span>,</span><br><span class="line">    <span class="number">-11</span>,<span class="number">9</span>, <span class="number">-8</span>,<span class="number">2</span><span class="comment">/*mean (3.37382e-05), correlation (0.0617409)*/</span>,</span><br><span class="line">    <span class="number">7</span>,<span class="number">-12</span>, <span class="number">12</span>,<span class="number">-13</span><span class="comment">/*mean (5.62303e-05), correlation (0.0636977)*/</span>,</span><br><span class="line">    <span class="number">2</span>,<span class="number">-13</span>, <span class="number">2</span>,<span class="number">12</span><span class="comment">/*mean (0.000134953), correlation (0.085099)*/</span>,</span><br><span class="line">    <span class="comment">// 共256行...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//注意到pattern0数据类型为Points*,bit_pattern_31_是int[]型，所以这里需要进行强制类型转换</span></span><br><span class="line"><span class="type">const</span> Point* pattern0 = (<span class="type">const</span> Point*)bit_pattern_31_;</span><br><span class="line"><span class="comment">//其实这里的操作就是，将在全局变量区域的、int格式的随机采样点以cv::point格式复制到当前类对象中的成员变量中</span></span><br><span class="line">std::<span class="built_in">copy</span>(pattern0, pattern0 + npoints, std::<span class="built_in">back_inserter</span>(pattern));</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-初始化一个计算特征点方向的圆"><a href="#2-3-初始化一个计算特征点方向的圆" class="headerlink" title="2.3 初始化一个计算特征点方向的圆"></a>2.3 初始化一个计算特征点方向的圆</h4><p>后面计算的是特征点主方向所设计的一个圆，计算过程中要将特征点周围像素旋转到主方向上，因此计算一个半径为16的圆的近似坐标，用于后面计算特征点方向时进行旋转操作。</p>
+<p>成员变量std::vector<int> umax里存储的实际上是逼近圆的第一象限内$\frac{1}{4}$ 圆周上每个v坐标对应的u坐标.为保证严格对称性,先计算下45°圆周上点的坐标,再根据对称性补全上45°圆周上点的坐标.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> vmax = <span class="built_in">cvFloor</span>(HALF_PATCH_SIZE * <span class="built_in">sqrt</span>(<span class="number">2.f</span>) / <span class="number">2</span> + <span class="number">1</span>); 	<span class="comment">// 45°射线与圆周交点的行坐标</span></span><br><span class="line"><span class="type">int</span> vmin = <span class="built_in">cvCeil</span>(HALF_PATCH_SIZE * <span class="built_in">sqrt</span>(<span class="number">2.f</span>) / <span class="number">2</span>);			<span class="comment">// 45°射线与圆周交点的纵坐标</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 先计算下半45度的umax</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> v = <span class="number">0</span>; v &lt;= vmax; ++v) &#123;</span><br><span class="line">	umax[v] = <span class="built_in">cvRound</span>(<span class="built_in">sqrt</span>(<span class="number">15</span> * <span class="number">15</span> - v * v));	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 根据对称性补出上半45度的umax</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> v = HALF_PATCH_SIZE, v0 = <span class="number">0</span>; v &gt;= vmin; --v) &#123;</span><br><span class="line">    <span class="keyword">while</span> (umax[v0] == umax[v0 + <span class="number">1</span>])</span><br><span class="line">        ++v0;</span><br><span class="line">    umax[v] = v0;</span><br><span class="line">    ++v0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>讲到这里，程序就从System的构造函数中出来，下面就循环读取每一张图片并进行单目的跟踪。</p>
+<h2 id="3-Tracking函数的GrabImageMonocular"><a href="#3-Tracking函数的GrabImageMonocular" class="headerlink" title="3. Tracking函数的GrabImageMonocular()"></a>3. Tracking函数的GrabImageMonocular()</h2><p>单目跟踪最主要就是这一行</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取相机位姿的估计结果</span></span><br><span class="line">cv::Mat Tcw = mpTracker-&gt;<span class="built_in">GrabImageMonocular</span>(im,timestamp);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cv::Mat <span class="title">Tracking::GrabImageMonocular</span><span class="params">(<span class="type">const</span> cv::Mat &amp;im,<span class="type">const</span> <span class="type">double</span> &amp;timestamp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    mImGray = im;</span><br><span class="line">    <span class="comment">// Step 1 ：将彩色图像转为灰度图像</span></span><br><span class="line">    <span class="comment">//若图片是3、4通道的，还需要转化成灰度图</span></span><br><span class="line">    <span class="keyword">if</span>(mImGray.<span class="built_in">channels</span>()==<span class="number">3</span>)</span><br><span class="line">    &#123;</span><br><span class="line">   		.......</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2 ：构造Frame</span></span><br><span class="line">    <span class="comment">//判断该帧是不是初始化</span></span><br><span class="line">    <span class="keyword">if</span>(mState==NOT_INITIALIZED || mState==NO_IMAGES_YET) <span class="comment">//没有成功初始化的前一个状态就是NO_IMAGES_YET</span></span><br><span class="line">        mCurrentFrame = <span class="built_in">Frame</span>(mImGray,timestamp, mpIniORBextractor, mpORBVocabulary, mK,mDistCoef,mbf,mThDepth);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        mCurrentFrame = <span class="built_in">Frame</span>(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Step 3 ：跟踪</span></span><br><span class="line">    <span class="built_in">Track</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//返回当前帧的位姿</span></span><br><span class="line">    <span class="keyword">return</span> mCurrentFrame.mTcw.<span class="built_in">clone</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>而在Frame的构造函数中进行了特征点的提取。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">Frame::<span class="built_in">Frame</span>() &#123;</span><br><span class="line">	<span class="comment">// Step 1 帧的ID 自增</span></span><br><span class="line">    mnId=nNextId++;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2 计算图像金字塔的参数 </span></span><br><span class="line">	<span class="comment">//获取图像金字塔的层数</span></span><br><span class="line">    mnScaleLevels = mpORBextractorLeft-&gt;<span class="built_in">GetLevels</span>();</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">	<span class="comment">// Step 3 对这个单目图像进行提取特征点, 第一个参数0-左图， 1-右图</span></span><br><span class="line">    <span class="built_in">ExtractORB</span>(<span class="number">0</span>,imGray);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 4 用OpenCV的矫正函数、内参对提取到的特征点进行矫正 </span></span><br><span class="line">    <span class="built_in">UndistortKeyPoints</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">//  Step 5 计算去畸变后图像边界，将特征点分配到网格中。这个过程一般是在第一帧或者是相机标定参数发生变化之后进行</span></span><br><span class="line">    <span class="keyword">if</span>(mbInitialComputations)</span><br><span class="line">    &#123;</span><br><span class="line">		<span class="comment">// 计算去畸变后图像的边界</span></span><br><span class="line">        <span class="built_in">ComputeImageBounds</span>(imGray);</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">         </span><br><span class="line">	<span class="comment">// 将特征点分配到图像网格中 </span></span><br><span class="line">    <span class="built_in">AssignFeaturesToGrid</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-ORBextractor-类提取特征点的主函数-void-operator"><a href="#4-ORBextractor-类提取特征点的主函数-void-operator" class="headerlink" title="4. ORBextractor 类提取特征点的主函数 void operator()()"></a>4. ORBextractor 类提取特征点的主函数 void operator()()</h2><p>这个函数是在<code>step3 ExtractORB(0,imGray)</code>中被调用的</p>
+<p>这个函数主要做了以下几个事情。</p>
+<ol>
+<li><p>构建图像金字塔 <code>ComputePyramid()</code></p>
+</li>
+<li><p>提取特征点并筛选分配<code>ComputeKeyPointsOctTree()</code></p>
+<p>​	2.1 八叉树筛选特征点: <code>DistributeOctTree()</code></p>
+<p>​	2.2 计算特征点方向<code>computeOrientation()</code></p>
+</li>
+<li><p>计算特征点描述子<code>computeOrbDescriptor()</code></p>
+</li>
+</ol>
+<h3 id="4-1-构建图像金字塔-ComputePyramid"><a href="#4-1-构建图像金字塔-ComputePyramid" class="headerlink" title="4.1 构建图像金字塔: ComputePyramid()"></a>4.1 构建图像金字塔: <code>ComputePyramid()</code></h3><p>根据上述变量的值计算出下述成员变量:</p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>成员变量</strong></th>
+<th align="center"><strong>访问控制</strong></th>
+<th align="center"><strong>意义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">std::vector<a href="cv::Mat">cv::Mat</a> mvImagePyramid</td>
+<td align="center">public</td>
+<td align="center">图像金字塔每层的图像</td>
+</tr>
+<tr>
+<td align="center">const int EDGE_THRESHOLD</td>
+<td align="center">全局变量</td>
+<td align="center">为计算描述子和提取特征点补的<code>padding</code>厚度</td>
+</tr>
+</tbody></table>
+<p>函数<code>void ORBextractor::ComputePyramid(cv::Mat image)</code>逐层计算图像金字塔,对于每层图像进行以下两步:</p>
+<p>1、先进行图片缩放，缩放到<code>mvInvScaleFactor</code>对应尺寸。<br>        2、在图像外补一圈厚度为19的<code>padding</code>(提取FAST特征点需要特征点周围半径为3的圆域，计算ORB描述子需要特征点周围半径为16的圆域).</p>
+<p>下图表示图像金字塔每层结构:</p>
+<p>深灰色为缩放后的原始图像；<br>        包含绿色边界在内的矩形用于提取FAST特征点；<br>        包含浅灰色边界在内的整个矩形用于计算ORB描述子；</p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/20210511182851517-16517180279282.png" alt="20210511182851517-16517180279282"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ORBextractor::ComputePyramid</span><span class="params">(cv::Mat image)</span> </span>&#123;</span><br><span class="line">   	<span class="comment">// 开始遍历所有的图层</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> level = <span class="number">0</span>; level &lt; nlevels; ++level) &#123;</span><br><span class="line">        <span class="comment">// 计算缩放+补padding后该层图像的尺寸</span></span><br><span class="line">        <span class="type">float</span> scale = mvInvScaleFactor[level];</span><br><span class="line">        <span class="function">Size <span class="title">sz</span><span class="params">(cvRound((<span class="type">float</span>)image.cols*scale), cvRound((<span class="type">float</span>)image.rows*scale))</span></span>;</span><br><span class="line">        <span class="function">Size <span class="title">wholeSize</span><span class="params">(sz.width + EDGE_THRESHOLD * <span class="number">2</span>, sz.height + EDGE_THRESHOLD * <span class="number">2</span>)</span></span>;</span><br><span class="line">        <span class="function">Mat <span class="title">temp</span><span class="params">(wholeSize, image.type())</span></span>;</span><br><span class="line">        </span><br><span class="line">		<span class="comment">// 缩放图像并复制到对应图层并补边</span></span><br><span class="line">        mvImagePyramid[level] = <span class="built_in">temp</span>(<span class="built_in">Rect</span>(EDGE_THRESHOLD, EDGE_THRESHOLD, sz.width, sz.height));</span><br><span class="line">        <span class="keyword">if</span>( level != <span class="number">0</span> ) &#123;</span><br><span class="line">            <span class="built_in">resize</span>(mvImagePyramid[level<span class="number">-1</span>], mvImagePyramid[level], sz, <span class="number">0</span>, <span class="number">0</span>, cv::INTER_LINEAR);</span><br><span class="line">            <span class="built_in">copyMakeBorder</span>(mvImagePyramid[level], temp, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD, </span><br><span class="line">                           BORDER_REFLECT_101+BORDER_ISOLATED);            </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">copyMakeBorder</span>(image, temp, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD, </span><br><span class="line">                           BORDER_REFLECT_101);            </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>copyMakeBorder</code>函数实现了复制和<code>padding</code>填充,其参数<code>BORDER_REFLECT_101</code>参数指定对<code>padding</code>进行镜像填充.</p>
+<h3 id="4-2-提取特征点并筛选分配-ComputeKeyPointsOctTree"><a href="#4-2-提取特征点并筛选分配-ComputeKeyPointsOctTree" class="headerlink" title="4.2 提取特征点并筛选分配: ComputeKeyPointsOctTree()"></a>4.2 提取特征点并筛选分配: ComputeKeyPointsOctTree()</h3><p>提取特征点最重要的就是力求特征点均匀地分布在图像的所有部分,为实现这一目标,编程实现上使用了两个技巧:</p>
+<p>1、分<code>CELL</code>搜索特征点，若某<code>CELL</code>内特征点响应值普遍较小的话就降低分数线再搜索一遍。<br>        2、对得到的所有特征点进行八叉树筛选，若某区域内特征点数目过于密集，则只取其中响应值最大的那个。</p>
+<p><code>CELL</code>搜索的示意图如下，每个<code>CELL</code>的大小约为<code>30✖30</code>，搜索到边上，剩余尺寸不够大的时候，最后一个<code>CELL</code>有多大就用多大的区域。</p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/20210511182846688-16517182671594.png" alt="请添加图片描述"></p>
+<p>需要注意的是相邻的<code>CELL</code>之间会有6像素的重叠区域，因为提取FAST特征点需要计算特征点周围半径为3的圆周上的像素点信息，实际上产生特征点的区域比传入的搜索区域小3像素。</p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/20210511182851506-16517182836696-16517182850878-16679800192091.png" alt="请添加图片描述"></p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/image-20221109154805206.png" alt="image-20221109154805206"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ORBextractor::ComputeKeyPointsOctTree</span><span class="params">(vector&lt;vector&lt;KeyPoint&gt; &gt;&amp; allKeypoints)</span>	</span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> level = <span class="number">0</span>; level &lt; nlevels; ++level)</span><br><span class="line">        <span class="comment">// 计算图像边界</span></span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> minBorderX = EDGE_THRESHOLD<span class="number">-3</span>;		</span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> minBorderY = minBorderX;				</span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> maxBorderX = mvImagePyramid[level].cols-EDGE_THRESHOLD+<span class="number">3</span>;</span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> maxBorderY = mvImagePyramid[level].rows-EDGE_THRESHOLD+<span class="number">3</span>;</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> width = (maxBorderX-minBorderX);</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> height = (maxBorderY-minBorderY);</span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> nCols = width/W;				<span class="comment">// 每一列有多少cell</span></span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> nRows = height/W;				<span class="comment">// 每一行有多少cell</span></span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> wCell = <span class="built_in">ceil</span>(width/nCols);	<span class="comment">// 每个cell的宽度</span></span><br><span class="line">        <span class="type">const</span> <span class="type">int</span> hCell = <span class="built_in">ceil</span>(height/nRows);	<span class="comment">// 每个cell的高度</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 存储需要进行平均分配的特征点</span></span><br><span class="line">        vector&lt;cv::KeyPoint&gt; vToDistributeKeys;</span><br><span class="line">		</span><br><span class="line">    	<span class="comment">// step1. 遍历每行和每列,依次分别用高低阈值搜索FAST特征点</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;nRows; i++) &#123;</span><br><span class="line">            <span class="type">const</span> <span class="type">float</span> iniY = minBorderY + i * hCell;</span><br><span class="line">            <span class="type">const</span> <span class="type">float</span> maxY = iniY + hCell + <span class="number">6</span>;</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>; j&lt;nCols; j++) &#123;</span><br><span class="line">                <span class="type">const</span> <span class="type">float</span> iniX =minBorderX + j * wCell;</span><br><span class="line">                <span class="type">const</span> <span class="type">float</span> maxX = iniX + wCell + <span class="number">6</span>;</span><br><span class="line">                vector&lt;cv::KeyPoint&gt; vKeysCell;</span><br><span class="line">				</span><br><span class="line">                <span class="comment">// 先用高阈值搜索FAST特征点</span></span><br><span class="line">                <span class="built_in">FAST</span>(mvImagePyramid[level].<span class="built_in">rowRange</span>(iniY,maxY).<span class="built_in">colRange</span>(iniX,maxX),	vKeysCell, iniThFAST, <span class="literal">true</span>);</span><br><span class="line">                <span class="comment">// 高阈值搜索不到的话,就用低阈值搜索FAST特征点</span></span><br><span class="line">                <span class="keyword">if</span>(vKeysCell.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">                    <span class="built_in">FAST</span>(mvImagePyramid[level].<span class="built_in">rowRange</span>(iniY,maxY).<span class="built_in">colRange</span>(iniX,maxX),	vKeysCell, minThFAST, <span class="literal">true</span>);</span><br><span class="line">                &#125;</span><br><span class="line">				<span class="comment">// 把 vKeysCell 中提取到的特征点全添加到 容器vToDistributeKeys 中</span></span><br><span class="line">                <span class="keyword">for</span>(KeyPoint point :vKeysCell) &#123;</span><br><span class="line">                    point.pt.x+=j*wCell;</span><br><span class="line">                    point.pt.y+=i*hCell;</span><br><span class="line">                    vToDistributeKeys.<span class="built_in">push_back</span>(point);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">		</span><br><span class="line">    	<span class="comment">// step2. 对提取到的特征点进行八叉树筛选,见 DistributeOctTree() 函数</span></span><br><span class="line">        keypoints = <span class="built_in">DistributeOctTree</span>(vToDistributeKeys, minBorderX, maxBorderX, minBorderY, maxBorderY, mnFeaturesPerLevel[level], level);</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 计算每个特征点的方向 注意这里还是分层计算的</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> level = <span class="number">0</span>; level &lt; nlevels; ++level)</span><br><span class="line">        <span class="built_in">computeOrientation</span>(mvImagePyramid[level], allKeypoints[level], umax);				</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="4-2-1-八叉树筛选特征点-DistributeOctTree"><a href="#4-2-1-八叉树筛选特征点-DistributeOctTree" class="headerlink" title="4.2.1 八叉树筛选特征点: DistributeOctTree()"></a>4.2.1 八叉树筛选特征点: <code>DistributeOctTree()</code></h4><p>函数DistributeOctTree()进行八叉树筛选(非极大值抑制)，不断将存在特征点的图像区域进行4等分，直到分出了足够多的分区,每个分区内只保留响应值最大的特征点。</p>
+<p>其代码实现比较琐碎，程序里还定义了一个ExtractorNode类用于进行八叉树分配，知道原理就行，不看代码。</p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/11" alt="请添加图片描述"></p>
+<h4 id="4-2-2-计算特征点方向computeOrientation"><a href="#4-2-2-计算特征点方向computeOrientation" class="headerlink" title="4.2.2 计算特征点方向computeOrientation()"></a>4.2.2 计算特征点方向<code>computeOrientation()</code></h4><p>函数<code>computeOrientation()</code>计算每个特征点的方向:使用特征点周围半径<code>19</code>大小的圆的重心方向作为特征点方向。</p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/20210511182847555.png" alt="20210511182847555"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">computeOrientation</span><span class="params">(<span class="type">const</span> Mat&amp; image, vector&lt;KeyPoint&gt;&amp; keypoints, <span class="type">const</span> vector&lt;<span class="type">int</span>&gt;&amp; umax)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (vector&lt;KeyPoint&gt;::iterator keypoint : keypoints) &#123;</span><br><span class="line">		<span class="comment">// 调用IC_Angle 函数计算这个特征点的方向</span></span><br><span class="line">        keypoint-&gt;angle = <span class="built_in">IC_Angle</span>(image, keypoint-&gt;pt, umax);	</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">float</span> <span class="title">IC_Angle</span><span class="params">(<span class="type">const</span> Mat&amp; image, Point2f pt,  <span class="type">const</span> vector&lt;<span class="type">int</span>&gt; &amp; u_max)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> m_01 = <span class="number">0</span>, m_10 = <span class="number">0</span>;			<span class="comment">// 重心方向</span></span><br><span class="line">    <span class="type">const</span> uchar* center = &amp;image.<span class="built_in">at</span>&lt;uchar&gt; (<span class="built_in">cvRound</span>(pt.y), <span class="built_in">cvRound</span>(pt.x));</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> u = -HALF_PATCH_SIZE; u &lt;= HALF_PATCH_SIZE; ++u)</span><br><span class="line">	    m_10 += u * center[u];</span><br><span class="line">    <span class="type">int</span> step = (<span class="type">int</span>)image.<span class="built_in">step1</span>();</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> v = <span class="number">1</span>; v &lt;= HALF_PATCH_SIZE; ++v) &#123;</span><br><span class="line">        <span class="type">int</span> v_sum = <span class="number">0</span>;</span><br><span class="line">	  	<span class="type">int</span> d = u_max[v];</span><br><span class="line">	    <span class="keyword">for</span> (<span class="type">int</span> u = -d; u &lt;= d; ++u) &#123;</span><br><span class="line">            <span class="type">int</span> val_plus = center[u + v*step], val_minus = center[u - v*step];</span><br><span class="line">            v_sum += (val_plus - val_minus);</span><br><span class="line">            m_10 += u * (val_plus + val_minus);</span><br><span class="line">        &#125;</span><br><span class="line">        m_01 += v * v_sum;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 为了加快速度使用了fastAtan2()函数，输出为[0,360)角度，精度为0.3°</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">fastAtan2</span>((<span class="type">float</span>)m_01, (<span class="type">float</span>)m_10);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-计算特征点描述子computeOrbDescriptor"><a href="#4-3-计算特征点描述子computeOrbDescriptor" class="headerlink" title="4.3 计算特征点描述子computeOrbDescriptor()"></a>4.3 计算特征点描述子<code>computeOrbDescriptor()</code></h3><p>计算<code>BRIEF</code>描述子的核心步骤是在特征点周围半径为<code>16</code>的圆域内选取<code>256</code>对点对，每个点对内比较得到1位，共得到<code>256</code>位的描述子，为保计算的一致性，工程上使用特定设计的点对<code>pattern</code>,在程序里被硬编码为成员变量了。</p>
+<p>在<code>computeOrientation()</code>中我们求出了每个特征点的主方向，在计算描述子时，应该将特征点周围像素旋转到主方向上来计算；为了编程方便,实践上对<code>pattern</code>进行旋转。</p>
+<p><img src="/../pictures/ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/20210511182851505.png" alt="请添加图片描述"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">computeOrbDescriptor</span><span class="params">(<span class="type">const</span> KeyPoint&amp; kpt, <span class="type">const</span> Mat&amp; img, <span class="type">const</span> Point* pattern, uchar* desc)</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">    <span class="type">float</span> angle = (<span class="type">float</span>)kpt.angle*factorPI;</span><br><span class="line">	<span class="type">float</span> a = (<span class="type">float</span>)<span class="built_in">cos</span>(angle), b = (<span class="type">float</span>)<span class="built_in">sin</span>(angle);</span><br><span class="line"></span><br><span class="line">	<span class="type">const</span> uchar* center = &amp;img.<span class="built_in">at</span>&lt;uchar&gt;(<span class="built_in">cvRound</span>(kpt.pt.y), <span class="built_in">cvRound</span>(kpt.pt.x));</span><br><span class="line">	<span class="type">const</span> <span class="type">int</span> step = (<span class="type">int</span>)img.step;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 旋转公式</span></span><br><span class="line">	<span class="comment">// x&#x27;= xcos(θ) - ysin(θ)</span></span><br><span class="line">    <span class="comment">// y&#x27;= xsin(θ) + ycos(θ)</span></span><br><span class="line">    <span class="meta">#<span class="keyword">define</span> GET_VALUE(idx) \</span></span><br><span class="line"><span class="meta">    center[cvRound(pattern[idx].x*b + pattern[idx].y*a)*step + cvRound(pattern[idx].x*a - pattern[idx].y*b)]        </span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">32</span>; ++i, pattern += <span class="number">16</span>) &#123;</span><br><span class="line">        <span class="type">int</span> t0, t1, val;</span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">0</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">1</span>);</span><br><span class="line">        val = t0 &lt; t1;								<span class="comment">// 描述子本字节的bit0</span></span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">2</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">3</span>);</span><br><span class="line">        val |= (t0 &lt; t1) &lt;&lt; <span class="number">1</span>;						<span class="comment">// 描述子本字节的bit1</span></span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">4</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">5</span>);</span><br><span class="line">        val |= (t0 &lt; t1) &lt;&lt; <span class="number">2</span>;						<span class="comment">// 描述子本字节的bit2</span></span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">6</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">7</span>);</span><br><span class="line">        val |= (t0 &lt; t1) &lt;&lt; <span class="number">3</span>;						<span class="comment">// 描述子本字节的bit3</span></span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">8</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">9</span>);</span><br><span class="line">        val |= (t0 &lt; t1) &lt;&lt; <span class="number">4</span>;						<span class="comment">// 描述子本字节的bit4</span></span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">10</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">11</span>);</span><br><span class="line">        val |= (t0 &lt; t1) &lt;&lt; <span class="number">5</span>;						<span class="comment">// 描述子本字节的bit5</span></span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">12</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">13</span>);</span><br><span class="line">        val |= (t0 &lt; t1) &lt;&lt; <span class="number">6</span>;						<span class="comment">// 描述子本字节的bit6</span></span><br><span class="line">        t0 = <span class="built_in">GET_VALUE</span>(<span class="number">14</span>); t1 = <span class="built_in">GET_VALUE</span>(<span class="number">15</span>);</span><br><span class="line">        val |= (t0 &lt; t1) &lt;&lt; <span class="number">7</span>;						<span class="comment">// 描述子本字节的bit7</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//保存当前比较的出来的描述子的这个字节</span></span><br><span class="line">        desc[i] = (uchar)val;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-ORBextractor类与其它类间的关系"><a href="#5-ORBextractor类与其它类间的关系" class="headerlink" title="5. ORBextractor类与其它类间的关系"></a>5. ORBextractor类与其它类间的关系</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Frame类的两个ORBextractor是在调用构造函数时传入的,构造函数中调用ExtractORB()提取特征点</span></span><br><span class="line">Frame::<span class="built_in">Frame</span>(ORBextractor *extractorLeft, ORBextractor *extractorRight) </span><br><span class="line">    : <span class="built_in">mpORBextractorLeft</span>(extractorLeft), <span class="built_in">mpORBextractorRight</span>(extractorRight) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 提取ORB特征点</span></span><br><span class="line">        <span class="function">thread <span class="title">threadLeft</span><span class="params">(&amp;Frame::ExtractORB, <span class="keyword">this</span>, <span class="number">0</span>, imLeft)</span></span>;</span><br><span class="line">        <span class="function">thread <span class="title">threadRight</span><span class="params">(&amp;Frame::ExtractORB, <span class="keyword">this</span>, <span class="number">1</span>, imRight)</span></span>;</span><br><span class="line">        threadLeft.<span class="built_in">join</span>();</span><br><span class="line">        threadRight.<span class="built_in">join</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...       </span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 提取特征点</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Frame::ExtractORB</span><span class="params">(<span class="type">int</span> flag, <span class="type">const</span> cv::Mat &amp;im)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (flag == <span class="number">0</span>)</span><br><span class="line">        (*mpORBextractorLeft)(im, cv::<span class="built_in">Mat</span>(), mvKeys, mDescriptors);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        (*mpORBextractorRight)(im, cv::<span class="built_in">Mat</span>(), mvKeysRight, mDescriptorsRight);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>Frame</code>类的两个<code>ORBextractor</code>指针指向的变量是<code>Tracking</code>类的构造函数中创建的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Tracking构造函数</span></span><br><span class="line">Tracking::<span class="built_in">Tracking</span>() &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建两个ORB特征点提取器</span></span><br><span class="line">    mpORBextractorLeft = <span class="keyword">new</span> <span class="built_in">ORBextractor</span>(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);</span><br><span class="line">    <span class="keyword">if</span> (sensor == System::STEREO)</span><br><span class="line">        mpORBextractorRight = <span class="keyword">new</span> <span class="built_in">ORBextractor</span>(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);</span><br><span class="line"></span><br><span class="line">  	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Tracking线程每收到一帧输入图片,就创建一个Frame对象,创建Frame对象时将提取器mpORBextractorLeft和mpORBextractorRight给构造函数</span></span><br><span class="line"><span class="function">cv::Mat <span class="title">Tracking::GrabImageStereo</span><span class="params">(<span class="type">const</span> cv::Mat &amp;imRectLeft, <span class="type">const</span> cv::Mat &amp;imRectRight, <span class="type">const</span> <span class="type">double</span> &amp;timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建Frame对象</span></span><br><span class="line">    mCurrentFrame = <span class="built_in">Frame</span>(mImGray, imGrayRight, timestamp, mpORBextractorLeft, mpORBextractorRight);</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>每次完成ORB特征点提取之后，图像金字塔信息就作废了，下一帧图像到来时调用ComputePyramid()函数会覆盖掉本帧图像的图像金字塔信息；但从金字塔中提取的图像特征点的信息会被保存在Frame对象中。所以ORB-SLAM2是稀疏重建，对每帧图像只保留最多nfeatures个特征点(及其对应的地图点)。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2023/04/06/2_ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2023/04/16/1_%E5%8D%95%E7%9B%AEorbslam2_%E8%BF%90%E8%A1%8C%E5%88%9D%E5%A7%8B%E5%8C%96/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            单目orbslam2 运行初始化
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/04/05/LOAM_Livox_runing/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">LOAM-Livox运行</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2023
+        <i class="ri-heart-fill heart_icon"></i> thelll
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/kaqiu.png" alt="心向天空"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i></p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

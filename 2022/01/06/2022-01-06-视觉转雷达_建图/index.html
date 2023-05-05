@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-Hans">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习，生活，娱乐" />
+       
+      <meta name="description" content="今天是一个值得记录的日子" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>视觉转雷达——建图 |  心向天空</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-2022-01-06-视觉转雷达_建图"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  视觉转雷达——建图
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/01/06/2022-01-06-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%BB%BA%E5%9B%BE/" class="article-date">
+  <time datetime="2022-01-05T16:00:00.000Z" itemprop="datePublished">2022-01-06</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E8%A7%86%E8%A7%89SLAM/">视觉SLAM</a> / <a class="article-category-link" href="/categories/%E8%A7%86%E8%A7%89SLAM/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">9 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="视觉转雷达——建图"><a href="#视觉转雷达——建图" class="headerlink" title="视觉转雷达——建图"></a>视觉转雷达——建图</h1><h2 id="Slam建图"><a href="#Slam建图" class="headerlink" title="Slam建图"></a>Slam建图</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1启动底盘模型及realsense相机</span></span><br><span class="line"><span class="string">roslaunch</span> <span class="string">scout_base</span> <span class="string">my_car.launch</span></span><br><span class="line"><span class="comment">#2启动激光雷达转odom</span></span><br><span class="line"><span class="string">roslaunch</span> <span class="string">rf2o_laser_odometry</span> <span class="string">rf2o_laser_odometry.launch</span></span><br><span class="line"><span class="comment">#启动slam建图</span></span><br><span class="line"><span class="string">roslaunch</span> <span class="string">scout_bringup</span> <span class="string">gmapping.launch</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>在终端下启动三个文件后，开始进行建图，使用遥控手柄遥控小车进行建图。</p>
+<p>地图保存命令为<code>rosrun map_server map_saver -f ~/map</code>运行该命令后会在home目录下保存两个文件一个是map.pgm和一个map.yaml。这是为了后期导航所用。下面介绍一下所用到的话题和节点。</p>
+<h3 id="1、使用rqt-graph查看话题和节点信息"><a href="#1、使用rqt-graph查看话题和节点信息" class="headerlink" title="1、使用rqt_graph查看话题和节点信息"></a>1、使用<code>rqt_graph</code>查看话题和节点信息</h3><p>因为没有激光雷达、只有一个realsense相机，同时不会视觉slam，所以只使用gmaping建图，就需要订阅雷达信息。</p>
+<p><img src="/../pictures/2022-01-06-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%BB%BA%E5%9B%BE/image-20220105201753772-16832766292954.png" alt="image-20220105201753772"></p>
+<p>在远古时期，有古人和我们遇见了相同的问题，就写了一个包叫做<code>depthimage_to_laserscan</code> ，它会订阅两个话题<code>camera_info</code>和<code>image_rect_raw</code>,发布一个话题<code>scan</code>。但在这里我改为了<code>laser_scanser_scan</code>，至于为什么，我好像忘了；<code>rf2o_laser_odometry</code>会订阅雷达信息，然后发布odom信息；然后<code>simple_gmaping</code>会订阅雷达信息和tf坐标变换信息，然后发布一个map这个话题。</p>
+<p>除此之外，还要保证tf坐标变换的一致性</p>
+<p><img src="/../pictures/2022-01-06-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%BB%BA%E5%9B%BE/image-20220105202922746-16832766494937.png" alt="image-20220105202922746"></p>
+<p>需要保证map–odom—base_link–camera&#x2F;laser&#x2F;base_link。因为需要满足坐标变换中的“单继承”的原则。</p>
+<h3 id="2、launch文件讲解"><a href="#2、launch文件讲解" class="headerlink" title="2、launch文件讲解"></a>2、launch文件讲解</h3><h4 id="1、my-car-launch"><a href="#1、my-car-launch" class="headerlink" title="1、my_car.launch"></a>1、<code>my_car.launch</code></h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&lt;launch&gt;</span></span><br><span class="line">        <span class="string">&lt;!--base--&gt;</span></span><br><span class="line">        <span class="string">&lt;!--这是启动机器人模型的文件</span>  <span class="string">--&gt;</span></span><br><span class="line">        <span class="string">&lt;include</span> <span class="string">file=&quot;$(find</span> <span class="string">scout_base)/launch/scout_mini_base_model_camera.launch&quot;</span> <span class="string">/&gt;</span></span><br><span class="line">        <span class="string">&lt;!--&lt;include</span> <span class="string">file=&quot;$(find</span> <span class="string">scout_base)/launch/scout_mini_base.launch&quot;</span> <span class="string">/&gt;</span> <span class="string">--&gt;</span></span><br><span class="line">        <span class="string">&lt;!--camera--&gt;</span></span><br><span class="line">        <span class="string">&lt;!--启动相机节点，发布image--&gt;</span></span><br><span class="line">        <span class="string">&lt;include</span> <span class="string">file=&quot;$(find</span> <span class="string">realsense2_camera)/launch/rs_camera.launch&quot;</span> <span class="string">/&gt;</span></span><br><span class="line">        <span class="string">&lt;!--将相机信息转换成雷达信息--&gt;</span></span><br><span class="line">        <span class="string">&lt;include</span> <span class="string">file=&quot;$(find</span> <span class="string">realsense2_camera)/launch/depth_scan.launch&quot;</span> <span class="string">/&gt;</span></span><br><span class="line"><span class="string">&lt;/launch&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、scout-mini-base-model-camera-launch"><a href="#2、scout-mini-base-model-camera-launch" class="headerlink" title="2、scout_mini_base_model_camera.launch"></a>2、<code>scout_mini_base_model_camera.launch</code></h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&lt;launch&gt;</span></span><br><span class="line">		<span class="string">&lt;!--机器人模型里面包含了松灵底盘模型和自己创建的相机模型--&gt;</span></span><br><span class="line">        <span class="string">&lt;param</span> <span class="string">name</span> <span class="string">=</span> <span class="string">&quot;robot_description&quot;</span> <span class="string">command</span> <span class="string">=</span> <span class="string">&quot;$(find xacro)/xacro $(find scout_description)/urdf/scout_v2_camera.xacro&quot;</span> <span class="string">/&gt;</span></span><br><span class="line">        <span class="string">&lt;!--关节和机器人节点，这是启动小车必备的，同时也需要注意不能重复启动这两个节点，会报错--&gt;</span></span><br><span class="line">        <span class="string">&lt;node</span> <span class="string">pkg=&quot;joint_state_publisher&quot;</span> <span class="string">name=&quot;joint_state_publisher&quot;</span> <span class="string">type=&quot;joint_state_publisher&quot;</span> <span class="string">/&gt;</span></span><br><span class="line">        <span class="string">&lt;node</span> <span class="string">pkg=&quot;robot_state_publisher&quot;</span> <span class="string">name=&quot;robot_state_publisher&quot;</span> <span class="string">type=&quot;robot_state_publisher&quot;</span> <span class="string">/&gt;</span></span><br><span class="line"><span class="string">&lt;/launch&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-1-scout-v2-camera-xacro"><a href="#2-1-scout-v2-camera-xacro" class="headerlink" title="2.1 scout_v2_camera.xacro"></a>2.1 <code>scout_v2_camera.xacro</code></h5><p>这个文件太长，就不单列出来。为了建图需要保证坐标变换正确，也就是单继承原则。有两种方法可以选择，①是进行坐标变换，②是将相机模型集成在底盘模型里面。对于第一种坐标变换，进行了许多尝试，但没有成功，就选择了第二种方式。而在松灵机器人的urdf模型中只有底盘模型，没有相机模型，就需要在底盘模型中重建相机模型。我这里选择建立一个小长方体来表示相机，将相机上的各种关节（joint）写上去就可以了。至于怎么写，就需要学会urdf和xacro的编写手法了。</p>
+<h4 id="3、rs-camera-launch"><a href="#3、rs-camera-launch" class="headerlink" title="3、rs_camera.launch"></a>3、<code>rs_camera.launch</code></h4><p>同理，太长了，就不列出来了。这个launch文件中前面的arg标签属于动态传参，类似于函数的参数，可以增强launch文件的灵活性。这个文件没有太多可讲的，主要作用就是启动realsense节点。至于里面这些参数都是固定的，当然想要了解可以去看一门课程<strong>AUTOLABOR的ROS机器人入门教程</strong>。</p>
+<h4 id="4、depth-scan-launch"><a href="#4、depth-scan-launch" class="headerlink" title="4、depth_scan.launch"></a>4、<code>depth_scan.launch</code></h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&lt;launch&gt;</span></span><br><span class="line">    <span class="string">&lt;node</span> <span class="string">pkg=&quot;depthimage_to_laserscan&quot;</span> <span class="string">type=&quot;depthimage_to_laserscan&quot;</span> <span class="string">name=&quot;depthimage_to_laserscan&quot;&gt;</span></span><br><span class="line">        <span class="string">&lt;remap</span> <span class="string">from=&quot;image&quot;</span> <span class="string">to=&quot;/camera/depth/image_rect_raw&quot;</span> <span class="string">/&gt;</span></span><br><span class="line">        <span class="string">&lt;remap</span> <span class="string">from=&quot;/scan&quot;</span> <span class="string">to=&quot;/laser_scan&quot;</span> <span class="string">/&gt;</span></span><br><span class="line">        <span class="string">&lt;param</span> <span class="string">name=&quot;output_frame_id&quot;</span> <span class="string">value=&quot;camera_link&quot;</span>  <span class="string">/&gt;</span></span><br><span class="line">    <span class="string">&lt;/node&gt;</span></span><br><span class="line"><span class="string">&lt;/launch&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>depthimage_to_laserscan</code>将实现深度图像与雷达数据的转换。雷达数据是二维的平面的、深度图像是三维的是若干二维数据的纵向叠加，如果将三维数据转换成二维数据，只需要取深度图的某一层即可。优点：深度相机便宜，降低成本。</p>
+<p>缺点：精度不如雷达，SLAM建图效果不如雷达理想（后话：建出来以后效果不是很好，地图要飘，在导航时，小车经常找不到自己的位置）。</p>
+<p><code>depthimage_to_laserscan</code> 功能包的核心节点是:<code>depthimage_to_laserscan</code> ，为了方便调用，需要先了解该节点订阅的话题、发布的话题以及相关参数。</p>
+<h5 id="4-1-订阅的Topic"><a href="#4-1-订阅的Topic" class="headerlink" title="4.1 订阅的Topic"></a>4.1 订阅的Topic</h5><p><code>image(sensor_msgs/Image)</code></p>
+<ul>
+<li>输入图像信息。</li>
+</ul>
+<p><code>camera_info(sensor_msgs/CameraInfo)</code></p>
+<ul>
+<li>关联图像的相机信息。通常不需要重新映射，因为camera_info将从与image相同的命名空间中进行订阅。</li>
+</ul>
+<h5 id="4-2-发布的Topic"><a href="#4-2-发布的Topic" class="headerlink" title="4.2 发布的Topic"></a>4.2 发布的Topic</h5><p><code>scan(sensor_msgs/LaserScan)</code></p>
+<ul>
+<li>发布转换成的激光雷达类型数据。</li>
+</ul>
+<h5 id="4-3-参数"><a href="#4-3-参数" class="headerlink" title="4.3 参数"></a>4.3 参数</h5><p>该节点参数较少，只有如下几个，一般需要设置的是: output_frame_id。</p>
+<p><code>~scan_height(int, default: 1 pixel)</code></p>
+<ul>
+<li>设置用于生成激光雷达信息的象素行数。</li>
+</ul>
+<p><code>~scan_time(double, default: 1/30.0Hz (0.033s))</code></p>
+<ul>
+<li>两次扫描的时间间隔。</li>
+</ul>
+<p><code>~range_min(double, default: 0.45m)</code></p>
+<ul>
+<li>返回的最小范围。结合range_max使用，只会获取 range_min 与 range_max 之间的数据。</li>
+</ul>
+<p><code>~range_max(double, default: 10.0m)</code></p>
+<ul>
+<li>返回的最大范围。结合range_min使用，只会获取 range_min 与 range_max 之间的数据。</li>
+</ul>
+<p><code>~output_frame_id(str, default: camera_depth_frame)</code></p>
+<ul>
+<li>激光信息的ID。</li>
+<li><strong>订阅的话题需要根据深度相机发布的话题设置，output_frame_id需要与深度相机的坐标系一致。</strong>这句话是重点，根据松灵小车的话题，更改了参数，同时重映射scan到laser_scan。</li>
+</ul>
+<h4 id="5、rf2o-laser-odometry-launch。"><a href="#5、rf2o-laser-odometry-launch。" class="headerlink" title="5、rf2o_laser_odometry.launch。"></a>5、<strong>rf2o_laser_odometry.launch。</strong></h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="string">&lt;launch&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="string">&lt;node</span> <span class="string">pkg=&quot;rf2o_laser_odometry&quot;</span> <span class="string">type=&quot;rf2o_laser_odometry_node&quot;</span> <span class="string">name=&quot;rf2o_laser_odometry&quot;</span> <span class="string">output=&quot;screen&quot;&gt;</span></span><br><span class="line">    <span class="string">&lt;!--&lt;param</span> <span class="string">name=&quot;laser_scan_topic&quot;</span> <span class="string">value=&quot;/scan&quot;/&gt;</span> <span class="string">--&gt;</span> </span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;/scan&quot;</span> <span class="string">value=&quot;/scan&quot;/&gt;</span>        <span class="comment"># topic where the lidar scans are being published</span></span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;odom_topic&quot;</span> <span class="string">value=&quot;/odom&quot;</span> <span class="string">/&gt;</span>              <span class="comment"># topic where tu publish the odometry estimations</span></span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;publish_tf&quot;</span> <span class="string">value=&quot;true&quot;</span> <span class="string">/&gt;</span>                   <span class="comment"># wheter or not to publish the tf::transform (base-&gt;odom)</span></span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;base_frame_id&quot;</span> <span class="string">value=&quot;base_link&quot;/&gt;</span>            <span class="comment"># frame_id (tf) of the mobile robot base. A tf transform from the laser_frame to the base_frame is mandatory</span></span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;odom_frame_id&quot;</span> <span class="string">value=&quot;odom&quot;</span> <span class="string">/&gt;</span>                <span class="comment"># frame_id (tf) to publish the odometry estimations    </span></span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;init_pose_from_topic&quot;</span> <span class="string">value=&quot;&quot;</span> <span class="string">/&gt;</span> <span class="comment"># (Odom topic) Leave empty to start at point (0,0)</span></span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;freq&quot;</span> <span class="string">value=&quot;10&quot;/&gt;</span>                            <span class="comment"># Execution frequency.</span></span><br><span class="line">    <span class="string">&lt;param</span> <span class="string">name=&quot;verbose&quot;</span> <span class="string">value=&quot;true&quot;</span> <span class="string">/&gt;</span>                       <span class="comment"># verbose</span></span><br><span class="line">  <span class="string">&lt;/node&gt;</span></span><br><span class="line">  </span><br><span class="line"><span class="string">&lt;/launch&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里重点是这句话 <code>&lt;param name=&quot;/scan&quot; value=&quot;/scan&quot;/&gt;</code>     我将laser_scan_topic该为了scan，因为我们雷达发布的是scan，只是在之前我把雷达改为laser_scan，<strong>至于原因好像是因为之前有一个节点发布了laser_scan怎么着的，我忘了，后面我在去查查，改为scan试试</strong>。</p>
+<h4 id="6、gmapping-launch"><a href="#6、gmapping-launch" class="headerlink" title="6、gmapping.launch"></a>6、gmapping.launch</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&lt;node</span> <span class="string">pkg=&quot;gmapping&quot;</span> <span class="string">type=&quot;slam_gmapping&quot;</span> <span class="string">name=&quot;simple_gmapping&quot;</span> <span class="string">output=&quot;screen&quot;&gt;</span> </span><br><span class="line">	<span class="string">&lt;remap</span> <span class="string">from=&quot;scan&quot;</span> <span class="string">to=&quot;/laser_scan&quot;/&gt;</span></span><br><span class="line">	<span class="string">&lt;rosparam&gt;</span></span><br><span class="line">      <span class="attr">odom_frame:</span> <span class="string">odom</span></span><br><span class="line">      <span class="attr">base_frame:</span> <span class="string">base_link</span></span><br><span class="line">      <span class="attr">map_frame:</span> <span class="string">map</span></span><br><span class="line"></span><br><span class="line">      <span class="attr">map_update_interval:</span> <span class="number">0.5</span> <span class="comment">#0.5 # Publish new map</span></span><br><span class="line"></span><br><span class="line">      <span class="attr">maxUrange:</span> <span class="number">10.0</span> <span class="comment">#19.9 #5.5 # Should be just less than sensor range</span></span><br><span class="line">      <span class="attr">maxRange:</span> <span class="number">10.1</span> <span class="comment">#20 #6.1 # Should be just greater than sensor range</span></span><br><span class="line">      <span class="attr">particles:</span> <span class="number">100</span> <span class="comment"># Increased from 80</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># Update frequencies</span></span><br><span class="line">      <span class="attr">linearUpdate:</span> <span class="number">0.3</span></span><br><span class="line">      <span class="attr">angularUpdate:</span> <span class="number">0.5</span> <span class="comment">#0.2 #0.5</span></span><br><span class="line">      <span class="attr">temporalUpdate:</span> <span class="number">2.0</span> <span class="comment">#1.0 #2.0</span></span><br><span class="line">      <span class="attr">resampleThreshold:</span> <span class="number">0.5</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># Initial Map Size</span></span><br><span class="line">      <span class="attr">xmin:</span> <span class="number">-100.0</span></span><br><span class="line">      <span class="attr">ymin:</span> <span class="number">-100.0</span></span><br><span class="line">      <span class="attr">xmax:</span> <span class="number">100.0</span></span><br><span class="line">      <span class="attr">ymax:</span> <span class="number">100.0</span></span><br><span class="line">      <span class="attr">delta:</span> <span class="number">0.05</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># All default</span></span><br><span class="line">      <span class="attr">sigma:</span> <span class="number">0.05</span></span><br><span class="line">      <span class="attr">kernelSize:</span> <span class="number">1</span></span><br><span class="line">      <span class="attr">lstep:</span> <span class="number">0.05</span></span><br><span class="line">      <span class="attr">astep:</span> <span class="number">0.05</span></span><br><span class="line">      <span class="attr">iterations:</span> <span class="number">5</span></span><br><span class="line">      <span class="attr">lsigma:</span> <span class="number">0.075</span></span><br><span class="line">      <span class="attr">ogain:</span> <span class="number">3.0</span></span><br><span class="line">      <span class="attr">lskip:</span> <span class="number">0</span></span><br><span class="line">      <span class="attr">llsamplerange:</span> <span class="number">0.01</span></span><br><span class="line">      <span class="attr">llsamplestep:</span> <span class="number">0.01</span></span><br><span class="line">      <span class="attr">lasamplerange:</span> <span class="number">0.005</span></span><br><span class="line">      <span class="attr">lasamplestep:</span> <span class="number">0.005</span></span><br><span class="line"></span><br><span class="line">    <span class="string">&lt;/rosparam&gt;</span></span><br><span class="line"> <span class="string">&lt;/node&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>针对这个gmapping主要更改了两个地方。一是添加了<remap from="scan" to="/laser_scan"/>，意思是将雷达订阅的话题重映射到laser_scan上，因为我们之前将雷达话题改为了这个。二是将<code>base_frame: base_footpoint</code>改为了<code>base_link</code>，因为在底盘机器人中<code>base_link</code>是根坐标，<code>base_footpoint</code>不是跟坐标。</p>
+<p>欧克，建图所用到的launch文件已经介绍完成，那么就可以开始建图了。</p>
+<p>建图效果如下：</p>
+<p><img src="/../pictures/2022-01-06-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%BB%BA%E5%9B%BE/image-20220107104336986-168327667607110.png" alt="image-20220107104336986"></p>
+<p>这个是224办公室的建图格栅图，效果不是很好，因为在转角的过程中会掉帧，然后就不能转换成激光信息从而完好的建图，第二个是地图飘得很厉害，odom与map之间得距离差得很远，好的建图应该是二者在一个点上</p>
+<p><img src="/../pictures/2022-01-06-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%BB%BA%E5%9B%BE/image-20220107104428613-168327669152513.png" alt="image-20220107104428613"></p>
+<p>这幅图是为了验证导航避障建的图；其中地图中间阴影部分为一个大纸箱，但在图上没有很好的表示出来，也是因为在转弯的时候地图已经飘了。</p>
+<h2 id="相关演示视频链接"><a href="#相关演示视频链接" class="headerlink" title="相关演示视频链接"></a>相关演示视频链接</h2><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1zo4y1A7M8/?share_source=copy_web&vd_source=6db56ec7201aacf71d1323c3ae4a2132">2022-01-rplidar_a3-松灵机器人-gampping建图</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>（1）<a target="_blank" rel="noopener" href="http://www.autolabor.com.cn/book/ROSTutorials/di-7-zhang-ji-qi-ren-dao-822a28-fang-771f29/73-dao-hang-xiang-jie/735-shen-du-tu-xiang-zhuan-ji-guang-shu-ju.html">7.3.5 深度图像转激光数据</a></p>
+<p>（2）<a target="_blank" rel="noopener" href="http://wiki.ros.org/depthimage_to_laserscan">depthimage_to_laserscan - ROS Wiki</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2022/01/06/2022-01-06-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%BB%BA%E5%9B%BE/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/demo/" rel="tag">demo</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/01/07/2022-01-07-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%AF%BC%E8%88%AA/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            视觉转雷达——导航
+          
+        </div>
+      </a>
+    
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2023
+        <i class="ri-heart-fill heart_icon"></i> thelll
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/kaqiu.png" alt="心向天空"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i></p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

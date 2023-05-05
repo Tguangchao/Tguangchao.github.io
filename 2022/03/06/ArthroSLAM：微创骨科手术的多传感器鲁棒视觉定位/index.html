@@ -15,7 +15,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>LOAM-Livox运行 |  心向天空</title>
+      <title>文献调研- ArthroSLAM |  心向天空</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -60,7 +60,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-LOAM_Livox_runing"
+  id="post-ArthroSLAM：微创骨科手术的多传感器鲁棒视觉定位"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -71,7 +71,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  LOAM-Livox运行
+  文献调研- ArthroSLAM
 </h1>
  
 
@@ -79,11 +79,11 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2023/04/05/LOAM_Livox_runing/" class="article-date">
-  <time datetime="2023-04-04T16:00:00.000Z" itemprop="datePublished">2023-04-05</time>
+      <a href="/2022/03/06/ArthroSLAM%EF%BC%9A%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/" class="article-date">
+  <time datetime="2022-03-05T16:00:00.000Z" itemprop="datePublished">2022-03-06</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a>
+    <a class="article-category-link" href="/categories/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/">文献阅读</a>
   </div>
   
 <div class="word_count">
@@ -91,7 +91,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">264</span>
+            <span class="post-count">2.8k</span>
         </span>
     </span>
 
@@ -100,7 +100,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">1 min</span>
+            <span class="post-count">9 min</span>
         </span>
     </span>
 </div>
@@ -115,25 +115,54 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="LOAM-Livox"><a href="#LOAM-Livox" class="headerlink" title="LOAM-Livox"></a>LOAM-Livox</h1><span id="more"></span>
+  <h1 id="医学slam"><a href="#医学slam" class="headerlink" title="医学slam"></a>医学slam</h1><h2 id="ArthroSLAM-Multi-Sensor-Robust-Visual-Localization-for-Minimally-Invasive-Orthopedic-Surgery"><a href="#ArthroSLAM-Multi-Sensor-Robust-Visual-Localization-for-Minimally-Invasive-Orthopedic-Surgery" class="headerlink" title="ArthroSLAM: Multi-Sensor Robust Visual Localization for Minimally Invasive Orthopedic Surgery"></a>ArthroSLAM: Multi-Sensor Robust Visual Localization for Minimally Invasive Orthopedic Surgery</h2><span id="more"></span>
 
-<p><strong>Loam-Livox是用于</strong><a target="_blank" rel="noopener" href="https://www.livoxtech.com/"><em>Livox 激光</em></a>雷达的稳健、低漂移和实时里程计和测绘软件包，是专为大规模工业用途而设计的低成本和高性能激光雷达。我们的软件包解决了许多关键问题：在非常有限的 FOV 中进行特征提取和选择、鲁棒的异常值抑制、移动对象过滤和运动失真补偿。此外，我们还集成了其他功能，如可并行管道、使用单元格和地图的点云管理、闭环、地图保存和重新加载实用程序</p>
-<h2 id="1-软件库"><a href="#1-软件库" class="headerlink" title="1.软件库"></a>1.软件库</h2><ul>
-<li><h3 id="ceres-1-14"><a href="#ceres-1-14" class="headerlink" title="ceres 1.14"></a>ceres 1.14</h3></li>
-<li><h3 id="pcl-1-9"><a href="#pcl-1-9" class="headerlink" title="pcl 1.9"></a>pcl 1.9</h3></li>
-<li><h3 id="vtk-8-2-0"><a href="#vtk-8-2-0" class="headerlink" title="vtk 8.2.0"></a>vtk 8.2.0</h3></li>
+<h3 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h3><p>微创关节镜手术是一项非常具有挑战性的手术，需要在有限的关节内空间内使用扭曲且有时无信息的图像来操作器械。始终可靠地定位关节镜对周围组织的定位，防止对患者造成意外伤害至关重要。<strong>首次提出并演示了一种称为</strong> <strong>ArthroSLAM</strong> <strong>的视觉同步定位和映射 (SLAM)</strong> <strong>系统，该系统能够稳健可靠地定位人类膝关节内的关节镜。所提出的系统融合了从关节镜、安装在关节镜支架上的外部摄像头、以及在扩展卡尔曼滤波器框架中操纵范围的机械臂的里程计。平均相对姿势误差高达 1.4</strong> <strong>毫米和 0.7</strong>。</p>
+<h3 id="一-介绍"><a href="#一-介绍" class="headerlink" title="一 介绍"></a>一 介绍</h3><p>提出了一种视觉 SLAM 系统，该系统利用除关节镜之外的第二个摄像头对患者身体外部进行成像。我们还利用手持关节镜的机械臂的里程计，重建轨迹并按比例绘制地图。我们提出的原型手术助手的图像如图 1 所示。在我们提出的策略中，ArthroSLAM是一种运动学模型，用于预测机械臂所持范围的位置。扩展卡尔曼滤波器 (EKF) 通过融合两个摄像机收集的外部和关节内非重叠观察结果来优化估计范围的位置。                               </p>
+<p>​    															 <img src="/../pictures/%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/11-16465732057681-16471376642001.png" alt="11"></p>
+<p>​																													图一</p>
+<p>图一中：机器人手术助手对人体肢体进行成像。两个视觉传感器刚性连接到机械臂上：关节镜和外部摄像头提供膝关节解剖结构的非重叠视图。底部：从外部相机（左）和关节镜（右）获取的图像中的关键点检测。</p>
+<p>在所有实验中， ArthroSLAM不间断地大规模定位在运行期间，漂移最小。它不需要初始化或规模恢复的预处理或后处理阶段，并且对于关节镜图像中的临时无信息内容也很稳健。我们的策略以高达 1.4 毫米和 0.7° 的平均相对姿势误差 (RPE) 可靠地定位关节镜，证明了其在关节内导航的可行性。此外，对我们的方法生成的稀疏 3D 地图的初步评估表明，与关节的形态具有良好的一致性，没有尺度模糊性。</p>
+<h3 id="二-文献部分"><a href="#二-文献部分" class="headerlink" title="二 文献部分"></a>二 文献部分</h3><p>MIP 图像，特别是关节镜图像，包括：1) 有限的基线运动，2) 非刚性、光滑和均匀的组织，3) 不可靠或不充分的显着图像内容。在这些条件下，使用单个单目传感器将不可避免地导致延迟、不连续或不可靠的估计。此外，使用仅轴承传感器通常需要仔细初始化和离线规模恢复程序。总而言之，该方法估计的有用性将受到严重影响。</p>
+<p>我们首次展示了使用关节镜进行微创骨科手术的视觉 SLAM。<strong>来自机器人里程计和第二个视觉传感器的信息使用 EKF 与关节镜融合</strong>。这种融合允许在运行时按比例估计相机位姿和地图估计，而无需初始化或比例恢复阶段。额外的传感器通过抵消关节镜图像中通常看到的有限数量的显着信息，增加了我们的 SLAM 系统的可靠性</p>
+<h3 id="三-ArthroSLAM"><a href="#三-ArthroSLAM" class="headerlink" title="三 ArthroSLAM"></a>三 ArthroSLAM</h3><p>我们的方法的动机是需要一种定位解决方案，该解决方案可以：</p>
+<ul>
+<li>1）提供大规模的轨迹和地图估计无需初始化或离线规模恢复阶段，</li>
+<li>2）即使在暂时没有信息的传感器观察下也能连续运行，</li>
+<li>3）在人体关节中以适当的精度可靠地定位。</li>
 </ul>
-<h2 id="2-构建"><a href="#2-构建" class="headerlink" title="2.构建"></a>2.构建</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd ~/catkin_ws/src</span><br><span class="line">git clone https://github.com/hku-mars/loam_livox.git</span><br><span class="line">cd ../</span><br><span class="line">catkin_make</span><br><span class="line">source ~/catkin_ws/devel/setup.bash</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-录制bag包"><a href="#3-录制bag包" class="headerlink" title="3.录制bag包"></a>3.录制bag包</h2><p>因为需要装很多库，所以没有在松灵小车上运行，而是先在小车上录制bag包，然后在PC端运行。</p>
-<p>3.1 运行livox雷达</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">roslaunch livox_ros_driver livox_lidar_rviz.launch</span><br></pre></td></tr></table></figure>
-
-<p>3.2 录制bag包</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosbag record /livox/lidar</span><br></pre></td></tr></table></figure>
-
-<h2 id="4-播放bag"><a href="#4-播放bag" class="headerlink" title="4.播放bag"></a>4.播放bag</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">roslaunch loam_livox rosbag.launch</span><br><span class="line">rosbag play YOUR_DOWNLOADED.bag</span><br><span class="line">#rosbag play loop.bag</span><br></pre></td></tr></table></figure>
-
+<p>为了克服先前的限制，我们建议使用廉价的外部摄像头来观察患者的肢体以及通常在手术机器人中可用的里程计数据。图 2 )。摄像头观察患者腿部和常用手术设备的外部情况。该视图与关节镜相机的图像在视觉上没有重叠，但它通常更清晰、纹理更丰富（见图1）。尽管可能有帮助，但不需要在场景中引入人造物体。我们进一步利用机械臂的里程计，不仅可以解决尺度模糊，还可以补偿视觉里程计方法常见的定位漂移</p>
+<p>​																       <img src="/../pictures/%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/2776-fig-3-source-large-16465733572153.gif" alt="img"></p>
+<p>​                                                                                                                   图二</p>
+<p><strong>我们利用扩展卡尔曼（ EKF） 公式来求解关节镜的定位作为机械臂运动命令 ( $$ U_K$$) 和视觉传感器观察 ($$ Z_k$$) 的函数</strong>。</p>
+<p><strong>运动模型</strong><br>$$<br>X_{k+1} &#x3D; f(X_k,U_k,V_k)<br>$$<br><strong>观测模型</strong><br>$$<br>Z_k &#x3D; h(X_k,W_k)<br>$$<br>其中 $$ U_K$$：机械臂运动函数；$$ Z_k$$ ：视觉传感器的观察函数；$$X_k$$：过滤器估计后的关节镜的位姿；   $$V_k$$：噪声（机械差异、反斜杠和关节执行器的精度）；$$W_k$$ ：噪声。</p>
+<p><strong>其中将机器人的位姿存储为一个 7 元素的状态向量，旋转编码为四元数。</strong></p>
+<p><strong>传感器测量对应于使用尺度不变特征变换 (SIFT) 从灰度图像中提取的显着关键点</strong></p>
+<h3 id="四-替代融合策略"><a href="#四-替代融合策略" class="headerlink" title="四 替代融合策略"></a>四 替代融合策略</h3><p>本节介绍部分组合感知数据的替代策略。我们使用部分融合策略但非同时使用所有可用的传感器数据，其中参考图 见图3 以了解策略的简化描述。外部摄像头和关节镜姿势分别称为 $$Pext$$ 和 $$Part$$。相机中心之间的变换矩阵 T 是从校准中获得的，并假定为常数。</p>
+<h4 id="•-纯里程计（pureodo）"><a href="#•-纯里程计（pureodo）" class="headerlink" title="• 纯里程计（pureodo）"></a>• 纯里程计（pureodo）</h4><p>依赖于机器人给出的里程计数据。</p>
+<h4 id="•-纯关节镜-Sfm-arthrosfm"><a href="#•-纯关节镜-Sfm-arthrosfm" class="headerlink" title="• 纯关节镜 Sfm (arthrosfm)"></a>• 纯关节镜 Sfm (arthrosfm)</h4><p>使用关节内图像来估计关节镜姿态， 该策略如下进行：连续关节镜图像之间的 2D 对应关系用于找到基本矩阵 (F) 并推断相对相机位姿。多视图三角测量用于生成 3D 点。调整 (BA) 算法通过最小化重投影误差来优化相机位姿和 3D 点估计。必须在相邻帧之间建立至少七个对应关系以允许计算 F。使用估计样本一致性 (MSAC) 算法来拒绝不正确的对应关系。轨迹是按比例估计的，但奇异值分解 (SVD) 可用于从与机器人里程计的最佳拟合中恢复比例。</p>
+<h4 id="•-双摄像头-Sfm-dualsfm"><a href="#•-双摄像头-Sfm-dualsfm" class="headerlink" title="• 双摄像头 Sfm (dualsfm)"></a>• 双摄像头 Sfm (dualsfm)</h4><p>估计的外部相机位姿可以在关节镜的坐标系中进行缩放和变换，以提供近似关节镜姿态，通过任何 2D-2D 关节镜对应，用于初始化 BA 优化。</p>
+<h4 id="•-基于关键帧的-Arthro-Sfm-key-sfm"><a href="#•-基于关键帧的-Arthro-Sfm-key-sfm" class="headerlink" title="• 基于关键帧的 Arthro Sfm (key-sfm)"></a>• 基于关键帧的 Arthro Sfm (key-sfm)</h4><p>在这个策略中，特征是通过外部摄像头获取的图像序列来跟踪的，但是，外部摄像头姿态仅针对一小部分关键帧进行估计和优化。众所周知，这可以改善对极几何约束，我们使用 ORBSLAM2来计算这样的关键帧。该方法按照仅使用这些关键帧的策略DualSfM的描述进行。</p>
+<h4 id="•-预定位关节-Sfm-odosfm"><a href="#•-预定位关节-Sfm-odosfm" class="headerlink" title="• 预定位关节 Sfm (odosfm)"></a>• 预定位关节 Sfm (odosfm)</h4><p>机器人里程计提供了关节镜姿势（部分）的初步估计。与 ArthroSfM 的策略相反，由关节镜对应产生的基本矩阵用于异常值拒绝，而不是用于相对姿态估计。由于机器人里程计的预初始化，估计的轨迹已经被缩放。</p>
+<p><img src="/../pictures/%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/2776-fig-2-source-large-16465749078482-16465749093614.gif" alt="img"></p>
+<p>​																																		图三</p>
+<h2 id="Dense-ArthroSLAM-Dense-Intra-Articular-3-D-Reconstruction-With-Robust-Localization-Prior-for-Arthroscopy"><a href="#Dense-ArthroSLAM-Dense-Intra-Articular-3-D-Reconstruction-With-Robust-Localization-Prior-for-Arthroscopy" class="headerlink" title="Dense-ArthroSLAM: Dense Intra-Articular 3-D Reconstruction With Robust Localization Prior for Arthroscopy"></a>Dense-ArthroSLAM: Dense Intra-Articular 3-D Reconstruction With Robust Localization Prior for Arthroscopy</h2><p><strong>效果</strong>：在上一篇文章中是建立的稀疏slam，这一篇文章是生成的稠密slam，同时在模型数据中的重建表现出在高达 13 $$cm^2$$ 的区域中的均方根误差 (RMSE) 为 0.3 mm 或更好。 同样，尸体数据的重建精度平均为 0.4 毫米。</p>
+<p><strong>方法</strong>：在ArthroSLAM,过滤器估计的相机姿势被馈送到关键帧选择块。根据平移和旋转变化量选择关键帧,然后再批量多视图立体（MVS）相结合，重建稠密三维地图。</p>
+<p><img src="/../pictures/%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/marm1-2892199-small-16466186260242-16466188602903.gif" alt=" 系统的功能图。"></p>
+<p>图1：系统的功能图。关节镜 (Art.) 和外部 (Ext.) 视觉传感器与机器人的里程计不断融合，以按比例估计范围位置。两个新组件（红色）选择有利的视点（关键帧）并密集地重建组织。</p>
+<h1 id="个人总结"><a href="#个人总结" class="headerlink" title="个人总结"></a>个人总结</h1><p>主要整理下第一篇文章的原理部分</p>
+<p>其中有两个重要的方程，运动方程和观察方程，如下。</p>
+<p><strong>运动模型</strong><br>$$<br>X_{k+1} &#x3D; f(X_k,U_k,V_k)<br>$$<br><strong>观测模型</strong><br>$$<br>Z_k &#x3D; h(X_k,W_k)<br>$$<br>其中 $$ U_K$$：机械臂运动函数；$$ Z_k$$ ：视觉传感器的观察函数；$$X_k$$：过滤器估计后的关节镜的位姿；   $$V_k$$：噪声（机械差异、反斜杠和关节执行器的精度）；$$W_k$$ ：噪声。</p>
+<p>而我认为的算法流程如下：</p>
+<ul>
+<li><strong>第一步提取sift特征点，匹配图片之间的特征点，建立联系；</strong></li>
+<li><strong>第二步通过对极几何约束求解基本矩阵（E），然后奇异值分解得到R和t（这里的R和t与机器人里程计的最佳拟合中恢复比例，也就是相互匹配）；</strong></li>
+<li><strong>第三步通过三角测量，得到空间3D点；</strong></li>
+<li><strong>第四步调整 (BA) 算法通过最小化重投影误差（PnP）来优化相机位姿和 3D 点估计</strong>（BA问题是将相机位姿和空间点放在一起进行最小化的问题）</li>
+</ul>
+<p>对于卡尔曼滤波(KF)来说，在线性高斯系统，克尔曼滤波构成了该系统中的最大后验概率估计，而在slam中，通常是非线性高斯系统，将克尔曼滤波扩展到非线性系统，就叫做扩展卡尔曼滤波（EKF）。（取一定的近似，将非线性变为线性，如对运动方程和观察方程进行一阶泰勒展开式）</p>
+<p><strong>在本文中，将机器人里程计和第二个视觉传感器的信息使用 EKF 与关节镜融合，也就是求这个融合系统的最大后验概率估计，而对于这个最大后验概率估计函数进行EKF,将其转变为线性高斯系统后进行误差的最小二乘法来迭代优化，而优化方面有高斯牛顿法和列文伯格法进行优化迭代，最后通过增量方程求出增量，进行位姿优化，也就是关节镜位姿的优化。</strong></p>
+<h1 id="下一步计划"><a href="#下一步计划" class="headerlink" title="下一步计划"></a>下一步计划</h1><p>两篇文章分别发表于2018年和2019年，使用的sift特征点，在网上查询了资料，没有这两篇文章的开源算法，所以，打算下周先看以orb特征点为代表的ORB-SLAM算法在腹腔中的应用，因为ORB-SLAM在github上有开源算法。</p>
  
       <!-- reward -->
       
@@ -198,12 +227,12 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2023/04/05/LOAM_Livox_runing/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2022/03/06/ArthroSLAM%EF%BC%9A%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%8C%BB%E5%AD%A6slam/" rel="tag">医学slam</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li></ul>
 
     </footer>
   </div>
@@ -211,19 +240,19 @@
    
   <nav class="article-nav">
     
-      <a href="/2023/04/06/2_ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/" class="article-nav-link">
+      <a href="/2023/04/05/LOAM_Livox_runing/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            （二）ORB特征点提取
+            LOAM-Livox运行
           
         </div>
       </a>
     
     
-      <a href="/2022/03/06/ArthroSLAM%EF%BC%9A%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/" class="article-nav-link">
+      <a href="/2022/01/07/2022-01-07-%E8%A7%86%E8%A7%89%E8%BD%AC%E9%9B%B7%E8%BE%BE_%E5%AF%BC%E8%88%AA/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">文献调研- ArthroSLAM</div>
+        <div class="article-nav-title">视觉转雷达——导航</div>
       </a>
     
   </nav>

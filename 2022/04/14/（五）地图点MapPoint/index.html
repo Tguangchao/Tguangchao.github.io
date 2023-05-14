@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-Hans">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习，生活，娱乐" />
+       
+      <meta name="description" content="今天是一个值得记录的日子" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>（五）地图点MapPoint |  心向天空</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/logo.jpg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-（五）地图点MapPoint"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  （五）地图点MapPoint
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/14/%EF%BC%88%E4%BA%94%EF%BC%89%E5%9C%B0%E5%9B%BE%E7%82%B9MapPoint/" class="article-date">
+  <time datetime="2022-04-13T16:00:00.000Z" itemprop="datePublished">2022-04-14</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ORBSLAM2/">ORBSLAM2</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">14 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="（五）地图点MapPoint"><a href="#（五）地图点MapPoint" class="headerlink" title="（五）地图点MapPoint"></a>（五）地图点MapPoint</h1><span id="more"></span>
+
+<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>在上一章中进行单目相机初始化后，就用<code>CreateInitialMapMonocular()</code>函数将<code>3D</code>点包装成<code>MapPoint</code>类型存入<code>KeyFrame</code>和<code>Map</code>中</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Tracking::CreateInitialMapMonocular</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 认为单目初始化时候的参考帧和当前帧都是关键帧</span></span><br><span class="line">    KeyFrame* pKFini = <span class="keyword">new</span> <span class="built_in">KeyFrame</span>(mInitialFrame,mpMap,mpKeyFrameDB);</span><br><span class="line">    KeyFrame* pKFcur = <span class="keyword">new</span> <span class="built_in">KeyFrame</span>(mCurrentFrame,mpMap,mpKeyFrameDB);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Step 1 将初始关键帧,当前关键帧的描述子转为BoW</span></span><br><span class="line">    pKFini-&gt;<span class="built_in">ComputeBoW</span>();</span><br><span class="line">    pKFcur-&gt;<span class="built_in">ComputeBoW</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2 将关键帧插入到地图</span></span><br><span class="line">    mpMap-&gt;<span class="built_in">AddKeyFrame</span>(pKFini);</span><br><span class="line">    mpMap-&gt;<span class="built_in">AddKeyFrame</span>(pKFcur);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 3 用初始化得到的3D点来生成地图点MapPoints</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>; i&lt;mvIniMatches.<span class="built_in">size</span>();i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(mvIniMatches[i]&lt;<span class="number">0</span>)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        <span class="function">cv::Mat <span class="title">worldPos</span><span class="params">(mvIniP3D[i])</span></span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// Step 3.1 用3D点构造MapPoint</span></span><br><span class="line">        MapPoint* pMP = <span class="keyword">new</span> <span class="built_in">MapPoint</span>(worldPos,pKFcur,mpMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 3.2 为该MapPoint添加属性：</span></span><br><span class="line">        <span class="comment">// a.观测到该MapPoint的关键帧</span></span><br><span class="line">        <span class="comment">// b.该MapPoint的描述子</span></span><br><span class="line">        <span class="comment">// c.该MapPoint的平均观测方向和深度范围</span></span><br><span class="line">        pKFini-&gt;<span class="built_in">AddMapPoint</span>(pMP,i);</span><br><span class="line">        pKFcur-&gt;<span class="built_in">AddMapPoint</span>(pMP,mvIniMatches[i]);</span><br><span class="line">        pMP-&gt;<span class="built_in">AddObservation</span>(pKFini,i);</span><br><span class="line">        pMP-&gt;<span class="built_in">AddObservation</span>(pKFcur,mvIniMatches[i]);</span><br><span class="line">        pMP-&gt;<span class="built_in">ComputeDistinctiveDescriptors</span>();</span><br><span class="line">        pMP-&gt;<span class="built_in">UpdateNormalAndDepth</span>();</span><br><span class="line">        mCurrentFrame.mvpMapPoints[mvIniMatches[i]] = pMP;</span><br><span class="line">        mCurrentFrame.mvbOutlier[mvIniMatches[i]] = <span class="literal">false</span>;</span><br><span class="line">        mpMap-&gt;<span class="built_in">AddMapPoint</span>(pMP);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Step 3.3 更新关键帧间的连接关系</span></span><br><span class="line">    pKFini-&gt;<span class="built_in">UpdateConnections</span>();</span><br><span class="line">    pKFcur-&gt;<span class="built_in">UpdateConnections</span>();</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// Step 4 全局BA优化，同时优化所有位姿和三维点</span></span><br><span class="line">    Optimizer::<span class="built_in">GlobalBundleAdjustemnt</span>(mpMap,<span class="number">20</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 5 尺度归一化</span></span><br><span class="line">    <span class="type">float</span> medianDepth = pKFini-&gt;<span class="built_in">ComputeSceneMedianDepth</span>(<span class="number">2</span>);</span><br><span class="line">    <span class="type">float</span> invMedianDepth = <span class="number">1.0f</span>/medianDepth;</span><br><span class="line">    <span class="keyword">if</span>(medianDepth&lt;<span class="number">0</span> || pKFcur-&gt;<span class="built_in">TrackedMapPoints</span>(<span class="number">1</span>)&lt;<span class="number">100</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Wrong initialization, reseting...&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">Reset</span>();</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cv::Mat Tc2w = pKFcur-&gt;<span class="built_in">GetPose</span>();</span><br><span class="line">    Tc2w.<span class="built_in">col</span>(<span class="number">3</span>).<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>) = Tc2w.<span class="built_in">col</span>(<span class="number">3</span>).<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>)*invMedianDepth;</span><br><span class="line">    pKFcur-&gt;<span class="built_in">SetPose</span>(Tc2w);</span><br><span class="line">    vector&lt;MapPoint*&gt; vpAllMapPoints = pKFini-&gt;<span class="built_in">GetMapPointMatches</span>();</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> iMP=<span class="number">0</span>; iMP&lt;vpAllMapPoints.<span class="built_in">size</span>(); iMP++) &#123;</span><br><span class="line">        <span class="keyword">if</span>(vpAllMapPoints[iMP]) &#123;</span><br><span class="line">            MapPoint* pMP = vpAllMapPoints[iMP];</span><br><span class="line">            pMP-&gt;<span class="built_in">SetWorldPos</span>(pMP-&gt;<span class="built_in">GetWorldPos</span>()*invMedianDepth);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">//  Step 8 将关键帧插入局部地图，更新归一化后的位姿、局部地图点</span></span><br><span class="line">    mpLocalMapper-&gt;<span class="built_in">InsertKeyFrame</span>(pKFini);</span><br><span class="line">    mpLocalMapper-&gt;<span class="built_in">InsertKeyFrame</span>(pKFcur);</span><br><span class="line">    mCurrentFrame.<span class="built_in">SetPose</span>(pKFcur-&gt;<span class="built_in">GetPose</span>());</span><br><span class="line">    mnLastKeyFrameId=mCurrentFrame.mnId;</span><br><span class="line">    mpLastKeyFrame = pKFcur;</span><br><span class="line">    mvpLocalKeyFrames.<span class="built_in">push_back</span>(pKFcur);</span><br><span class="line">    mvpLocalKeyFrames.<span class="built_in">push_back</span>(pKFini);</span><br><span class="line">    mvpLocalMapPoints=mpMap-&gt;<span class="built_in">GetAllMapPoints</span>();</span><br><span class="line">    mpReferenceKF = pKFcur;</span><br><span class="line">    mCurrentFrame.mpReferenceKF = pKFcur;</span><br><span class="line">    mLastFrame = <span class="built_in">Frame</span>(mCurrentFrame);</span><br><span class="line">    mpMap-&gt;<span class="built_in">SetReferenceMapPoints</span>(mvpLocalMapPoints);</span><br><span class="line">    mpMapDrawer-&gt;<span class="built_in">SetCurrentCameraPose</span>(pKFcur-&gt;<span class="built_in">GetPose</span>());</span><br><span class="line">    mpMap-&gt;mvpKeyFrameOrigins.<span class="built_in">push_back</span>(pKFini);</span><br><span class="line">    mState=OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-地图点的世界坐标-mWorldPos"><a href="#2-地图点的世界坐标-mWorldPos" class="headerlink" title="2. 地图点的世界坐标: mWorldPos"></a>2. 地图点的世界坐标: <code>mWorldPos</code></h2><table>
+<thead>
+<tr>
+<th align="center"><strong>成员函数&#x2F;变量</strong></th>
+<th align="center"><strong>访问控制</strong></th>
+<th align="center"><strong>意义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">cv::Mat mWorldPos</td>
+<td align="center">protected</td>
+<td align="center">地图点的世界坐标</td>
+</tr>
+<tr>
+<td align="center">cv::Mat GetWorldPos()</td>
+<td align="center">public</td>
+<td align="center"><code>mWorldPos</code>的get方法</td>
+</tr>
+<tr>
+<td align="center">void SetWorldPos(const cv::Mat &amp;Pos)</td>
+<td align="center">public</td>
+<td align="center"><code>mWorldPos</code>的set方法</td>
+</tr>
+<tr>
+<td align="center">std::mutex mMutexPos</td>
+<td align="center">protected</td>
+<td align="center"><code>mWorldPos</code>的锁</td>
+</tr>
+</tbody></table>
+<h2 id="3-与关键帧的观测关系-AddObservation"><a href="#3-与关键帧的观测关系-AddObservation" class="headerlink" title="3. 与关键帧的观测关系: AddObservation()"></a>3. 与关键帧的观测关系: <code>AddObservation()</code></h2><p><strong>表示该MapPoint可以被哪个KeyFrame的哪个特征点观测到</strong></p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>成员函数&#x2F;变量</strong></th>
+<th align="center"><strong>访问控制</strong></th>
+<th align="center"><strong>意义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>std::map&lt;KeyFrame*, size_t&gt; mObservations</code></td>
+<td align="center"><code>protected</code></td>
+<td align="center"><code>当前地图点在某KeyFrame中的索引</code></td>
+</tr>
+<tr>
+<td align="center"><code>map&lt;KeyFrame*, size_t&gt; GetObservations()</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>mObservations的get方法</code></td>
+</tr>
+<tr>
+<td align="center"><code>void AddObservation(KeyFrame* pKF,size_t idx)</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>添加当前地图点对某KeyFrame的观测</code></td>
+</tr>
+<tr>
+<td align="center"><code>void EraseObservation(KeyFrame* pKF)</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>删除当前地图点对某KeyFrame的观测</code></td>
+</tr>
+<tr>
+<td align="center"><code>bool IsInKeyFrame(KeyFrame* pKF)</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>查询当前地图点是否在某KeyFrame中</code></td>
+</tr>
+<tr>
+<td align="center"><code>int GetIndexInKeyFrame(KeyFrame* pKF)</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>查询当前地图点在某KeyFrame中的索引</code></td>
+</tr>
+<tr>
+<td align="center"><code>int nObs</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>记录当前地图点被多少相机观测到，单目帧每次观测加1,双目帧每次观测加2</code></td>
+</tr>
+<tr>
+<td align="center"><code>int Observations()</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>nObs的get方法</code></td>
+</tr>
+</tbody></table>
+<p>成员变量<code>std::map&lt;KeyFrame*,size_t&gt; mObservations</code>保存了当前关键点对关键帧<code>KeyFrame</code>的观测关系，<code>std::map</code>是一个<code>key-value</code>结构，其<code>key</code>为某个关键帧，<code>value</code>为当前地图点在该关键帧中的索引(是在该关键帧成员变量<code>std::vector&lt;MapPoint*&gt; mvpMapPoints</code>中的索引)。</p>
+<p>成员<code>int nObs</code>记录了当前地图点被多少个关键帧相机观测到了(单目关键帧每次观测算1个相机，双目&#x2F;RGBD帧每次观测算2个相机)。</p>
+<p>函数<code>AddObservation</code>()和<code>EraseObservation</code>()同时维护<code>mObservations</code>和<code>nObs</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 向参考帧pKF中添加对本地图点的观测,本地图点在pKF中的编号为idx</span></span><br><span class="line"><span class="comment">// 这个函数是建立关键帧共视关系的核心函数，能共同观测到某些地图点的关键帧是共视关键帧</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">MapPoint::AddObservation</span><span class="params">(KeyFrame* pKF, <span class="type">size_t</span> idx)</span> </span>&#123;</span><br><span class="line">    <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock</span><span class="params">(mMutexFeatures)</span></span>;</span><br><span class="line">    <span class="comment">// 如果已经添加过观测，返回</span></span><br><span class="line">    <span class="keyword">if</span>(mObservations.<span class="built_in">count</span>(pKF)) </span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    <span class="comment">// 如果没有添加过观测，记录下能观测到该MapPoint的KF和该MapPoint在KF中的索引</span></span><br><span class="line">    mObservations[pKF]=idx;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据观测形式是单目还是双目更新观测计数变量nObs</span></span><br><span class="line">    <span class="keyword">if</span>(pKF-&gt;mvuRight[idx]&gt;=<span class="number">0</span>)</span><br><span class="line">        nObs += <span class="number">2</span>; </span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        nObs++; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从参考帧pKF中移除本地图点</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">MapPoint::EraseObservation</span><span class="params">(KeyFrame* pKF)</span>  </span>&#123;</span><br><span class="line">    <span class="type">bool</span> bBad=<span class="literal">false</span>;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock</span><span class="params">(mMutexFeatures)</span></span>;</span><br><span class="line">        <span class="comment">// 查找这个要删除的观测,根据单目和双目类型的不同从其中删除当前地图点的被观测次数</span></span><br><span class="line">        <span class="keyword">if</span>(mObservations.<span class="built_in">count</span>(pKF)) &#123;</span><br><span class="line">            <span class="keyword">if</span>(pKF-&gt;mvuRight[mObservations[pKF]]&gt;=<span class="number">0</span>)</span><br><span class="line">                nObs-=<span class="number">2</span>;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                nObs--;</span><br><span class="line">            mObservations.<span class="built_in">erase</span>(pKF);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 如果该keyFrame是参考帧，该Frame被删除后重新指定RefFrame</span></span><br><span class="line">            <span class="keyword">if</span>(mpRefKF == pKF)</span><br><span class="line">                mpRefKF = mObservations.<span class="built_in">begin</span>()-&gt;first;		</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 当观测到该点的相机数目少于2时，丢弃该点(至少需要两个观测才能三角化)</span></span><br><span class="line">            <span class="keyword">if</span>(nObs&lt;=<span class="number">2</span>)</span><br><span class="line">                bBad=<span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(bBad)</span><br><span class="line">        <span class="comment">// 告知可以观测到该MapPoint的Frame，该MapPoint已被删除</span></span><br><span class="line">        <span class="built_in">SetBadFlag</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>函数<code>GetIndexInKeyFrame()</code>和<code>IsInKeyFrame()</code>就是对<code>mObservations</code>的简单查询</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">MapPoint::GetIndexInKeyFrame</span><span class="params">(KeyFrame *pKF)</span> </span>&#123;</span><br><span class="line">    <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock</span><span class="params">(mMutexFeatures)</span></span>;</span><br><span class="line">    <span class="keyword">if</span>(mObservations.<span class="built_in">count</span>(pKF))</span><br><span class="line">        <span class="keyword">return</span> mObservations[pKF];</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">MapPoint::IsInKeyFrame</span><span class="params">(KeyFrame *pKF)</span> </span>&#123;</span><br><span class="line">    <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock</span><span class="params">(mMutexFeatures)</span></span>;</span><br><span class="line">    <span class="keyword">return</span> (mObservations.<span class="built_in">count</span>(pKF));</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-挑选最具代表性的描述子ComputeDistinctiveDescriptors（）"><a href="#4-挑选最具代表性的描述子ComputeDistinctiveDescriptors（）" class="headerlink" title="4. 挑选最具代表性的描述子ComputeDistinctiveDescriptors（）"></a>4. 挑选最具代表性的描述子<code>ComputeDistinctiveDescriptors（）</code></h2><p>由于一个地图点会被许多相机观测到，因此在插入关键帧后，需要判断是否更新代表当前点的描述子 。</p>
+<p> 先获得当前点的所有描述子，然后计算描述子之间两两汉明距离，最好的描述子与其他描述子应该具有最小的距离中值。</p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>成员函数&#x2F;变量</strong></th>
+<th align="center">访问控制</th>
+<th align="center"><strong>意义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>cv::Mat mDescriptor</code></td>
+<td align="center"><code>protected</code></td>
+<td align="center"><code>当前关键点的特征描述子(所有描述子的中位数)</code></td>
+</tr>
+<tr>
+<td align="center"><code>cv::Mat GetDescriptor()</code></td>
+<td align="center"><code>public</code></td>
+<td align="center"><code>mDescriptor的get方法</code></td>
+</tr>
+<tr>
+<td align="center"><code>void ComputeDistinctiveDescriptors()</code></td>
+<td align="center"><code>publicpublic</code></td>
+<td align="center"><code>计算mDescriptor</code></td>
+</tr>
+</tbody></table>
+<p>一个地图点在不同关键帧中对应不同的特征点和描述子，其特征描述子<code>mDescriptor</code>是其在所有观测关键帧中描述子的中位数(准确地说，该描述子与其他所有描述子的中值距离最小)。</p>
+<ul>
+<li>特征描述子的更新时机:</li>
+</ul>
+<p>一旦某地图点对关键帧的观测<code>mObservations</code>发生改变,就调用函数<code>MapPoint::ComputeDistinctiveDescriptors()</code>更新该地图点的特征描述子。</p>
+<ul>
+<li>特征描述子的用途:</li>
+</ul>
+<p><strong>在函数<code>ORBmatcher::SearchByProjection()</code>和<code>ORBmatcher::Fuse()</code>中,通过比较地图点的特征描述子与图片特征点描述子，实现将地图点与图像特征点的匹配(3D-2D匹配)。</strong></p>
+<h2 id="5-更新地图点的平均观测方向、观测距离范围UpdateNormalAndDepth"><a href="#5-更新地图点的平均观测方向、观测距离范围UpdateNormalAndDepth" class="headerlink" title="5. 更新地图点的平均观测方向、观测距离范围UpdateNormalAndDepth()"></a>5. 更新地图点的平均观测方向、观测距离范围UpdateNormalAndDepth()</h2><p>函数<code>UpdateNormalAndDepth()</code>更新当前地图点的<strong>平均观测方向和距离</strong>，其中平均观测方向是根据<code>mObservations</code>中<strong>所有观测到本地图点的关键帧</strong>取平均得到的，类似下图的向量求和;平均观测距离是根据<strong>参考关键帧</strong>得到的。</p>
+<p><img src="/%EF%BC%88%E4%BA%94%EF%BC%89%E5%9C%B0%E5%9B%BE%E7%82%B9MapPoint.assets/image.JZBZV1.png" alt="image.JZBZV1"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">MapPoint::UpdateNormalAndDepth</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// step1. 获取地图点相关信息</span></span><br><span class="line">    map&lt;KeyFrame *, <span class="type">size_t</span>&gt; observations;</span><br><span class="line">    KeyFrame *pRefKF;</span><br><span class="line">    cv::Mat Pos;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock1</span><span class="params">(mMutexFeatures)</span></span>;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock2</span><span class="params">(mMutexPos)</span></span>;</span><br><span class="line"></span><br><span class="line">        observations = mObservations;</span><br><span class="line">        pRefKF = mpRefKF;            </span><br><span class="line">        Pos = mWorldPos.<span class="built_in">clone</span>();    </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// step2. 根据观测到地图点的关键帧取平均计算平均观测方向</span></span><br><span class="line">    cv::Mat normal = cv::Mat::<span class="built_in">zeros</span>(<span class="number">3</span>, <span class="number">1</span>, CV_32F);</span><br><span class="line">    <span class="type">int</span> n = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (KeyFrame *pKF : observations.<span class="built_in">begin</span>()) &#123;</span><br><span class="line">        normal = normal + normali / cv::<span class="built_in">norm</span>(mWorldPos - pKF-&gt;<span class="built_in">GetCameraCenter</span>());</span><br><span class="line">        n++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// step3. 根据参考帧计算平均观测距离</span></span><br><span class="line">    cv::Mat PC = Pos - pRefKF-&gt;<span class="built_in">GetCameraCenter</span>();       </span><br><span class="line">    <span class="type">const</span> <span class="type">float</span> dist = cv::<span class="built_in">norm</span>(PC);                    </span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> level = pRefKF-&gt;mvKeysUn[observations[pRefKF]].octave;</span><br><span class="line">    <span class="type">const</span> <span class="type">float</span> levelScaleFactor = pRefKF-&gt;mvScaleFactors[level];   </span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> nLevels = pRefKF-&gt;mnScaleLevels;                      </span><br><span class="line"></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock3</span><span class="params">(mMutexPos)</span></span>;</span><br><span class="line">        mfMaxDistance = dist * levelScaleFactor;</span><br><span class="line">        mfMinDistance = mfMaxDistance / pRefKF-&gt;mvScaleFactors[nLevels - <span class="number">1</span>];</span><br><span class="line">        mNormalVector = normal / n;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-1-平均观测距离-mfMinDistance和mfMaxDistance"><a href="#5-1-平均观测距离-mfMinDistance和mfMaxDistance" class="headerlink" title="5.1 平均观测距离: mfMinDistance和mfMaxDistance"></a>5.1 <strong>平均观测距离: mfMinDistance和mfMaxDistance</strong></h3><p>特征点的观测距离与其在图像金字塔中的图层呈线性关系，直观上理解，如果一个图像区域被放大后才能识别出来，说明该区域的观测深度较深。</p>
+<p>特征点的平均观测距离的上下限由成员变量<code>mfMaxDistance</code>和<code>mfMinDistance</code>表示:</p>
+<ul>
+<li><code>mfMaxDistance</code>表示若地图点匹配在某特征提取器图像金字塔第7层上的某特征点,观测距离值</li>
+<li><code>mfMinDistance</code>表示若地图点匹配在某特征提取器图像金字塔第0层上的某特征点,观测距离值</li>
+</ul>
+<p>这两个变量是基于地图点在其参考关键帧上的观测得到的。</p>
+<p><img src="/%EF%BC%88%E4%BA%94%EF%BC%89%E5%9C%B0%E5%9B%BE%E7%82%B9MapPoint.assets/20210511182847565-16684945770671.png" alt="20210511182847565"></p>
+<h3 id="5-2-UpdateNormalAndDepth-调用时机"><a href="#5-2-UpdateNormalAndDepth-调用时机" class="headerlink" title="5.2 UpdateNormalAndDepth()调用时机"></a>5.2 UpdateNormalAndDepth()调用时机</h3><p>地图点的平均观测距离是根据其参考关键帧计算的，那么参考关键帧<code>KeyFrame* mpRefKF</code>是如何指定的呢?</p>
+<ul>
+<li><p>构造函数中，创建该地图点的参考帧被设为参考关键帧。</p>
+</li>
+<li><p>若当前地图点对参考关键帧的观测被删除<code>(EraseObservation(KeyFrame* pKF))</code>，则取第一个观测到当前地图点的关键帧做参考关键帧。</p>
+</li>
+</ul>
+<p>函数<code>MapPoint::UpdateNormalAndDepth()</code>的调用时机:</p>
+<ul>
+<li>创建地图点时调用<code>UpdateNormalAndDepth()</code>初始化其观测信息。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pNewMP-&gt;<span class="built_in">AddObservation</span>(pKF, i);</span><br><span class="line">pKF-&gt;<span class="built_in">AddMapPoint</span>(pNewMP, i);</span><br><span class="line">pNewMP-&gt;<span class="built_in">ComputeDistinctiveDescriptors</span>();</span><br><span class="line">pNewMP-&gt;<span class="built_in">UpdateNormalAndDepth</span>();				<span class="comment">// 更新平均观测方向和距离	</span></span><br><span class="line">mpMap-&gt;<span class="built_in">AddMapPoint</span>(pNewMP);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>地图点对关键帧的观测<code>mObservations</code>更新时(<strong>跟踪局部地图添加或删除对关键帧的观测</strong>时、**<code>LocalMapping</code>线程删除冗余关键帧<strong>时或</strong><code>LoopClosing</code>线程闭环矫正**时)，调用<code>UpdateNormalAndDepth()</code>初始化其观测信息。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pMP-&gt;<span class="built_in">AddObservation</span>(mpCurrentKeyFrame, i);</span><br><span class="line">pMP-&gt;<span class="built_in">UpdateNormalAndDepth</span>();</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>地图点世界坐标<code>mWorldPos</code>发生变化时(BA优化之后)，调用<code>UpdateNormalAndDepth()</code>初始化其观测信息。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pMP-&gt;<span class="built_in">SetWorldPos</span>(cvCorrectedP3Dw);</span><br><span class="line">pMP-&gt;<span class="built_in">UpdateNormalAndDepth</span>();</span><br></pre></td></tr></table></figure>
+
+<p>总结成一句话: 只要<strong>地图点本身</strong>或<strong>关键帧对该地图点的观测</strong>发生变化，就应该调用函数<code>MapPoint::UpdateNormalAndDepth()</code>更新其观测尺度和方向信息。</p>
+<h2 id="6-地图点的删除-SetBadFlag"><a href="#6-地图点的删除-SetBadFlag" class="headerlink" title="6. 地图点的删除: SetBadFlag()"></a>6. 地图点的删除: <code>SetBadFlag()</code></h2><p>变量mbBad用来表征当前地图点是否被删除。</p>
+<p>删除地图点的各成员变量是一个较耗时的过程，因此函数SetBadFlag()删除关键点时采取先标记再清除的方式，具体的删除过程分为以下两步:</p>
+<ul>
+<li>先将坏点标记mbBad置为true，逻辑上删除该地图点。(地图点的社会性死亡)</li>
+<li>再依次清空当前地图点的各成员变量，物理上删除该地图点。(地图点的肉体死亡)</li>
+</ul>
+<p>这样只有在设置坏点标记mbBad时需要加锁,之后的操作就不需要加锁了</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">MapPoint::SetBadFlag</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    map&lt;KeyFrame *, <span class="type">size_t</span>&gt; obs;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock1</span><span class="params">(mMutexFeatures)</span></span>;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock2</span><span class="params">(mMutexPos)</span></span>;</span><br><span class="line">        mbBad = <span class="literal">true</span>;			<span class="comment">// 标记mbBad,逻辑上删除当前地图点</span></span><br><span class="line">        obs = mObservations;</span><br><span class="line">        mObservations.<span class="built_in">clear</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 删除关键帧对当前地图点的观测</span></span><br><span class="line">    <span class="keyword">for</span> (KeyFrame *pKF : obs.<span class="built_in">begin</span>()) &#123;</span><br><span class="line">        pKF-&gt;<span class="built_in">EraseMapPointMatch</span>(mit-&gt;second);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在地图类上注册删除当前地图点,这里会发生内存泄漏</span></span><br><span class="line">    mpMap-&gt;<span class="built_in">EraseMapPoint</span>(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>成员变量<code>mbBad</code>表示当前地图点逻辑上是否被删除，在后面用到地图点的地方，都要通过<code>isBad()</code>函数确认当前地图点没有被删除，再接着进行其它操作。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">KeyFrame::TrackedMapPoints</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;minObs)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">        MapPoint *pMP = mvpMapPoints[i];</span><br><span class="line">        <span class="keyword">if</span> (pMP &amp;&amp; !pMP-&gt;<span class="built_in">isBad</span>()) &#123;			<span class="comment">// 依次检查该地图点物理上和逻辑上是否删除,若删除了就不对其操作</span></span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="7-地图点的替换-Replace"><a href="#7-地图点的替换-Replace" class="headerlink" title="7. 地图点的替换: Replace()"></a>7. 地图点的替换: <code>Replace()</code></h2><p>函数<code>Replace(MapPoint* pMP)</code>将当前地图点的成员变量叠加到新地图点<code>pMP</code>上。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">MapPoint::Replace</span><span class="params">(MapPoint *pMP)</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 如果是同一地图点则跳过</span></span><br><span class="line">    <span class="keyword">if</span> (pMP-&gt;mnId == <span class="keyword">this</span>-&gt;mnId)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// step1. 逻辑上删除当前地图点</span></span><br><span class="line">    <span class="type">int</span> nvisible, nfound;</span><br><span class="line">    map&lt;KeyFrame *, <span class="type">size_t</span>&gt; obs;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock1</span><span class="params">(mMutexFeatures)</span></span>;</span><br><span class="line">        <span class="function">unique_lock&lt;mutex&gt; <span class="title">lock2</span><span class="params">(mMutexPos)</span></span>;</span><br><span class="line">        obs = mObservations;</span><br><span class="line">        mObservations.<span class="built_in">clear</span>();</span><br><span class="line">        mbBad = <span class="literal">true</span>;</span><br><span class="line">        nvisible = mnVisible;</span><br><span class="line">        nfound = mnFound;</span><br><span class="line">        mpReplaced = pMP;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// step2. 将当地图点的数据叠加到新地图点上</span></span><br><span class="line">    <span class="keyword">for</span> (map&lt;KeyFrame *, <span class="type">size_t</span>&gt;::iterator mit = obs.<span class="built_in">begin</span>(), mend = obs.<span class="built_in">end</span>(); mit != mend; mit++) &#123;</span><br><span class="line">        KeyFrame *pKF = mit-&gt;first;</span><br><span class="line">        <span class="keyword">if</span> (!pMP-&gt;<span class="built_in">IsInKeyFrame</span>(pKF)) &#123;</span><br><span class="line">            pKF-&gt;<span class="built_in">ReplaceMapPointMatch</span>(mit-&gt;second, pMP);</span><br><span class="line">            pMP-&gt;<span class="built_in">AddObservation</span>(pKF, mit-&gt;second);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            pKF-&gt;<span class="built_in">EraseMapPointMatch</span>(mit-&gt;second);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    pMP-&gt;<span class="built_in">IncreaseFound</span>(nfound);</span><br><span class="line">    pMP-&gt;<span class="built_in">IncreaseVisible</span>(nvisible);</span><br><span class="line">    pMP-&gt;<span class="built_in">ComputeDistinctiveDescriptors</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// step3. 删除当前地图点</span></span><br><span class="line">    mpMap-&gt;<span class="built_in">EraseMapPoint</span>(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="8-MapPoint类的用途"><a href="#8-MapPoint类的用途" class="headerlink" title="8.MapPoint类的用途"></a>8.<code>MapPoint</code>类的用途</h2><ul>
+<li><img src="/%EF%BC%88%E4%BA%94%EF%BC%89%E5%9C%B0%E5%9B%BE%E7%82%B9MapPoint.assets/image.DIE2V1.png"></li>
+</ul>
+<p>创建<code>MapPoint</code>的时机:</p>
+<ul>
+<li><p><code>Tracking</code>线程中初始化过程<code>(Tracking::MonocularInitialization()和Tracking::StereoInitialization())</code></p>
+</li>
+<li><p><code>Tracking</code>线程中创建新的关键帧<code>(Tracking::CreateNewKeyFrame())</code></p>
+</li>
+<li><p><code>Tracking</code>线程中恒速运动模型跟踪<code>(Tracking::TrackWithMotionModel())</code>也会产生临时地图点，但这些临时地图点在跟踪成功后会被马上删除(那跟踪失败怎么办?跟踪失败的话不会产生关键帧,这些地图点也不会被注册进地图)。</p>
+</li>
+<li><p><code>LocalMapping</code>线程中创建新地图点的步骤<code>(LocalMapping::CreateNewMapPoints())</code>会将当前关键帧与前一关键帧进行匹配，生成新地图点。</p>
+</li>
+</ul>
+<p>删除<code>MapPoint</code>的时机:</p>
+<ul>
+<li><p><code>LocalMapping</code>线程中删除恶劣地图点的步骤<code>(LocalMapping::MapPointCulling())</code>。</p>
+</li>
+<li><p>删除关键帧的函数<code>KeyFrame::SetBadFlag()</code>会调用函数<code>MapPoint::EraseObservation()</code>删除地图点对关键帧的观测，若地图点对关键帧的观测少于2，则地图点无法被三角化,就删除该地图点。</p>
+</li>
+</ul>
+<p>替换<code>MapPoint</code>的时机:</p>
+<ul>
+<li><code>Loop Closing</code>线程中闭环矫正<code>(LoopClosing::CorrectLoop())</code>时当前关键帧和闭环关键帧上的地图点发生冲突时，会使用闭环关键帧的地图点替换当前关键帧的地图点。</li>
+<li><code>LoopClosing</code>线程中闭环矫正函数<code>LoopClosing::CorrectLoop(</code>)会调用<code>LoopClosing::SearchAndFuse()</code>将闭环关键帧的共视关键帧组中所有地图点投影到当前关键帧的共视关键帧组中，发生冲突时就会替换。</li>
+</ul>
+<h2 id="9-参考链接"><a href="#9-参考链接" class="headerlink" title="9. 参考链接"></a>9. 参考链接</h2><p>（1）<a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/document/7946260">ORB-SLAM2: An Open-Source SLAM System for Monocular, Stereo, and RGB-D Cameras</a></p>
+<p>（2） <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bK4y197kB/?spm_id_from=333.999.0.0&vd_source=d1710c631949e73d7f9132da564b19d4">5小时让你假装大概看懂ORB-SLAM2源码</a></p>
+<p>（3）<a target="_blank" rel="noopener" href="https://github.com/electech6/ORB_SLAM2_detailed_comments">https://github.com/electech6/ORB_SLAM2_detailed_comments</a></p>
+<p>（4）<a target="_blank" rel="noopener" href="https://github.com/raulmur/ORB_SLAM2">https://github.com/raulmur/ORB_SLAM2</a></p>
+<p>（5）计算机视觉之ORBSLAM2课程</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2022/04/14/%EF%BC%88%E4%BA%94%EF%BC%89%E5%9C%B0%E5%9B%BE%E7%82%B9MapPoint/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/28/%EF%BC%88%E5%85%AD%EF%BC%89%E5%85%B3%E9%94%AE%E5%B8%A7KeyFrame/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            （六）关键帧KeyFrame
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/10/%EF%BC%88%E5%9B%9B%EF%BC%89%E5%8D%95%E7%9B%AE%E5%88%9D%E5%A7%8B%E5%8C%96/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">（四）单目初始化</div>
+      </a>
+    
+  </nav>
+
+  
+   
+<div class="gitalk" id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.css">
+
+
+<script src="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.js"></script>
+
+
+<script src="https://cdn.staticfile.org/blueimp-md5/2.19.0/js/md5.min.js"></script>
+
+<script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '',
+    clientSecret: '',
+    repo: '',
+    owner: '',
+    admin: [''],
+    // id: location.pathname,      // Ensure uniqueness and length less than 50
+    id: md5(location.pathname),
+    distractionFreeMode: false,  // Facebook-like distraction free mode
+    pagerDirection: 'last'
+  })
+
+  gitalk.render('gitalk-container')
+</script>
+
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021-2023
+        <i class="ri-heart-fill heart_icon"></i> thelll
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/kaqiu.png" alt="心向天空"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i></p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/MathJax.js"></script>
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/config/TeX-AMS-MML_HTMLorMML-full.js"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    <div id="music">
+    
+    
+    
+    <iframe frameborder="no" border="1" marginwidth="0" marginheight="0" width="200" height="52"
+        src="//music.163.com/outchain/player?type=2&id=109734&auto=1&height=32"></iframe>
+</div>
+
+<style>
+    #music {
+        position: fixed;
+        right: 15px;
+        bottom: 0;
+        z-index: 998;
+    }
+</style>
+    
+    
+
+  </div>
+</body>
+
+</html>

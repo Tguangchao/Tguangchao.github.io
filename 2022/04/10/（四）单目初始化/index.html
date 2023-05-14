@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-Hans">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习，生活，娱乐" />
+       
+      <meta name="description" content="今天是一个值得记录的日子" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>（四）单目初始化 |  心向天空</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/logo.jpg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-（四）单目初始化"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  （四）单目初始化
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/10/%EF%BC%88%E5%9B%9B%EF%BC%89%E5%8D%95%E7%9B%AE%E5%88%9D%E5%A7%8B%E5%8C%96/" class="article-date">
+  <time datetime="2022-04-09T16:00:00.000Z" itemprop="datePublished">2022-04-10</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ORBSLAM2/">ORBSLAM2</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">8.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">37 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="（四）单目初始化"><a href="#（四）单目初始化" class="headerlink" title="（四）单目初始化"></a>（四）单目初始化</h1><span id="more"></span>
+
+<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h2><p>在<code>Tracking::Track()</code>首先会根据相机类型进行双目&#x2F;rgb&#x2F;单目的初始化，因为主要是用单目，所以先讲解单目初始化<code>MonocularInitialization()</code></p>
+<table>
+<thead>
+<tr>
+<th align="center"><code>成员函数/变量</code></th>
+<th><code>访问控制</code></th>
+<th align="center"><code>意义</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>void MonocularInitialization()</code></td>
+<td><code>protected</code></td>
+<td align="center"><code>单目相机初始化</code></td>
+</tr>
+<tr>
+<td align="center"><code>void CreateInitialMapMonocular()</code></td>
+<td><code>protected</code></td>
+<td align="center"><code>单目初始化成功后建立初始局部地图</code></td>
+</tr>
+<tr>
+<td align="center"><code>Initializer* mpInitializer</code></td>
+<td><code>protected</code></td>
+<td align="center"><code>单目初始化器</code></td>
+</tr>
+<tr>
+<td align="center"><code>Frame mInitialFrame</code></td>
+<td><code>public</code></td>
+<td align="center"><code>单目初始化参考帧(实际上就是前一帧)</code></td>
+</tr>
+<tr>
+<td align="center"><code>std::vector&lt;cv::Point3f&gt; mvIniP3D</code></td>
+<td><code>public</code></td>
+<td align="center"><code>单目初始化中三角化得到的地图点坐标</code></td>
+</tr>
+<tr>
+<td align="center"><code>std::vector&lt;cv::Point2f&gt; mvbPrevMatched</code></td>
+<td><code>public</code></td>
+<td align="center"><code>单目初始化参考帧地图点</code></td>
+</tr>
+<tr>
+<td align="center"><code>std::vector&lt;int&gt; mvIniMatches</code></td>
+<td><code>public</code></td>
+<td align="center"><code>单目初始化中参考帧与当前帧的匹配关系</code></td>
+</tr>
+</tbody></table>
+<p>首先第一帧图片过来，会判断特征点数目是否大于100，如果大于则创建初始化器，然后等第二帧过来，如果特征点也大于100，那么就进行下面的特征匹配，如果小于，则删除掉，重新初始化。</p>
+<p><strong>因此单目相机初始化条件: 连续两帧间特征点都超过 100 个点,则初始化成功.</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * @brief 单目的地图初始化</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * 并行地计算基础矩阵和单应性矩阵，选取其中一个模型，恢复出最开始两帧之间的相对姿态以及点云</span></span><br><span class="line"><span class="comment"> * 得到初始两帧的匹配、相对运动、初始MapPoints</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * Step 1：（未创建）得到用于初始化的第一帧，初始化需要两帧</span></span><br><span class="line"><span class="comment"> * Step 2：（已创建）如果当前帧特征点数大于100，则得到用于单目初始化的第二帧</span></span><br><span class="line"><span class="comment"> * Step 3：在mInitialFrame与mCurrentFrame中找匹配的特征点对</span></span><br><span class="line"><span class="comment"> * Step 4：如果初始化的两帧之间的匹配点太少，重新初始化</span></span><br><span class="line"><span class="comment"> * Step 5：通过H模型或F模型进行单目初始化，得到两帧间相对运动、初始MapPoints</span></span><br><span class="line"><span class="comment"> * Step 6：删除那些无法进行三角化的匹配点</span></span><br><span class="line"><span class="comment"> * Step 7：将三角化得到的3D点包装成MapPoints</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Tracking::MonocularInitialization</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="comment">// Step 1 如果单目初始器还没有被创建，则创建。后面如果重新初始化时会清掉这个</span></span><br><span class="line">    <span class="keyword">if</span>(!mpInitializer)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 单目初始帧的特征点数必须大于100</span></span><br><span class="line">        <span class="keyword">if</span>(mCurrentFrame.mvKeys.<span class="built_in">size</span>()&gt;<span class="number">100</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 初始化需要两帧，分别是mInitialFrame，mCurrentFrame</span></span><br><span class="line">            mInitialFrame = <span class="built_in">Frame</span>(mCurrentFrame);</span><br><span class="line">            <span class="comment">// 用当前帧更新上一帧</span></span><br><span class="line">            mLastFrame = <span class="built_in">Frame</span>(mCurrentFrame);</span><br><span class="line">            <span class="comment">// mvbPrevMatched  记录&quot;上一帧&quot;所有特征点</span></span><br><span class="line">            mvbPrevMatched.<span class="built_in">resize</span>(mCurrentFrame.mvKeysUn.<span class="built_in">size</span>());</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>; i&lt;mCurrentFrame.mvKeysUn.<span class="built_in">size</span>(); i++)</span><br><span class="line">                mvbPrevMatched[i]=mCurrentFrame.mvKeysUn[i].pt;</span><br><span class="line">            <span class="comment">// 由当前帧构造初始器 sigma:1.0 iterations:200</span></span><br><span class="line">            mpInitializer =  <span class="keyword">new</span> <span class="built_in">Initializer</span>(mCurrentFrame,<span class="number">1.0</span>,<span class="number">200</span>);</span><br><span class="line">            <span class="comment">// 初始化为-1 表示没有任何匹配。这里面存储的是匹配的点的id</span></span><br><span class="line">            <span class="built_in">fill</span>(mvIniMatches.<span class="built_in">begin</span>(),mvIniMatches.<span class="built_in">end</span>(),<span class="number">-1</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>    <span class="comment">//如果单目初始化器已经被创建</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Step 2 如果当前帧特征点数太少（不超过100），则重新构造初始器</span></span><br><span class="line">        <span class="comment">// NOTICE 只有连续两帧的特征点个数都大于100时，才能继续进行初始化过程</span></span><br><span class="line">        <span class="keyword">if</span>((<span class="type">int</span>)mCurrentFrame.mvKeys.<span class="built_in">size</span>()&lt;=<span class="number">100</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">delete</span> mpInitializer;</span><br><span class="line">            mpInitializer = <span class="built_in">static_cast</span>&lt;Initializer*&gt;(<span class="literal">NULL</span>);</span><br><span class="line">            <span class="built_in">fill</span>(mvIniMatches.<span class="built_in">begin</span>(),mvIniMatches.<span class="built_in">end</span>(),<span class="number">-1</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// Step 3 在mInitialFrame与mCurrentFrame中找匹配的特征点对</span></span><br><span class="line">        <span class="function">ORBmatcher <span class="title">matcher</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="number">0.9</span>,        <span class="comment">//最佳的和次佳特征点评分的比值阈值，这里是比较宽松的，跟踪时一般是0.7</span></span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="literal">true</span>)</span></span>;      <span class="comment">//检查特征点的方向</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对 mInitialFrame,mCurrentFrame 进行特征点匹配</span></span><br><span class="line">        <span class="type">int</span> nmatches = matcher.<span class="built_in">SearchForInitialization</span>(</span><br><span class="line">            mInitialFrame,mCurrentFrame,    <span class="comment">//初始化时的参考帧和当前帧</span></span><br><span class="line">            mvbPrevMatched,                 <span class="comment">//在初始化参考帧中提取得到的特征点</span></span><br><span class="line">            mvIniMatches,                   <span class="comment">//保存匹配关系</span></span><br><span class="line">            <span class="number">100</span>);                           <span class="comment">//搜索窗口大小</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 4 验证匹配结果，如果初始化的两帧之间的匹配点太少，重新初始化</span></span><br><span class="line">        <span class="keyword">if</span>(nmatches&lt;<span class="number">100</span>) &#123;</span><br><span class="line">            <span class="keyword">delete</span> mpInitializer;</span><br><span class="line">            mpInitializer = <span class="built_in">static_cast</span>&lt;Initializer*&gt;(<span class="literal">NULL</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 5 通过H模型或F模型进行单目初始化，得到两帧间相对运动、初始MapPoints</span></span><br><span class="line">        <span class="keyword">if</span>(mpInitializer-&gt;<span class="built_in">Initialize</span>(</span><br><span class="line">            mCurrentFrame,      <span class="comment">//当前帧</span></span><br><span class="line">            mvIniMatches,       <span class="comment">//当前帧和参考帧的特征点的匹配关系</span></span><br><span class="line">            Rcw, tcw,           <span class="comment">//初始化得到的相机的位姿</span></span><br><span class="line">            mvIniP3D,           <span class="comment">//进行三角化得到的空间点集合</span></span><br><span class="line">            vbTriangulated))    <span class="comment">//以及对应于mvIniMatches来讲,其中哪些点被三角化了</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// Step 6 初始化成功后，删除那些无法进行三角化的匹配点</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>, iend=mvIniMatches.<span class="built_in">size</span>(); i&lt;iend;i++) &#123;</span><br><span class="line">                <span class="keyword">if</span>(mvIniMatches[i]&gt;=<span class="number">0</span> &amp;&amp; !vbTriangulated[i]) &#123;</span><br><span class="line">                    mvIniMatches[i]=<span class="number">-1</span>;</span><br><span class="line">                    nmatches--;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Step 7 将初始化的第一帧作为世界坐标系，因此第一帧变换矩阵为单位矩阵</span></span><br><span class="line">            mInitialFrame.<span class="built_in">SetPose</span>(cv::Mat::<span class="built_in">eye</span>(<span class="number">4</span>,<span class="number">4</span>,CV_32F));</span><br><span class="line">            <span class="comment">// 由Rcw和tcw构造Tcw,并赋值给mTcw，mTcw为世界坐标系到相机坐标系的变换矩阵</span></span><br><span class="line">            cv::Mat Tcw = cv::Mat::<span class="built_in">eye</span>(<span class="number">4</span>,<span class="number">4</span>,CV_32F);</span><br><span class="line">            Rcw.<span class="built_in">copyTo</span>(Tcw.<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>).<span class="built_in">colRange</span>(<span class="number">0</span>,<span class="number">3</span>));</span><br><span class="line">            tcw.<span class="built_in">copyTo</span>(Tcw.<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>).<span class="built_in">col</span>(<span class="number">3</span>));</span><br><span class="line">            mCurrentFrame.<span class="built_in">SetPose</span>(Tcw);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Step 8 创建初始化地图点MapPoints</span></span><br><span class="line">            <span class="comment">// CreateInitialMapMonocular将3D点包装成MapPoint类型存入KeyFrame和Map中</span></span><br><span class="line">            <span class="built_in">CreateInitialMapMonocular</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-特征匹配SearchForInitialization"><a href="#2-特征匹配SearchForInitialization" class="headerlink" title="2. 特征匹配SearchForInitialization()"></a>2. 特征匹配SearchForInitialization()</h2><p>在初始化成功后，就要根据特征点进行特征匹配。</p>
+<p><strong>这个函数大致意思就是在第二帧中每个关键点范围画一个圆，在圆内找相邻的关键点并计算描述子的汉明距离，小于一定距离就被认为是相互匹配的，同时为了加快匹配的速度，还将像素分成了10x10的网格进行匹配最后，返回的是匹配的数量。</strong></p>
+<p><img src="/%EF%BC%88%E5%9B%9B%EF%BC%89%E5%8D%95%E7%9B%AE%E5%88%9D%E5%A7%8B%E5%8C%96.assets/image-20221111100011187.png" alt="image-20221111100011187"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 单目初始化中用于参考帧和当前帧的特征点匹配</span></span><br><span class="line"><span class="comment"> * 步骤</span></span><br><span class="line"><span class="comment"> * Step 1 构建旋转直方图</span></span><br><span class="line"><span class="comment"> * Step 2 在半径窗口内搜索当前帧F2中所有的候选匹配特征点 </span></span><br><span class="line"><span class="comment"> * Step 3 遍历搜索搜索窗口中的所有潜在的匹配候选点，找到最优的和次优的</span></span><br><span class="line"><span class="comment"> * Step 4 对最优次优结果进行检查，满足阈值、最优/次优比例，删除重复匹配</span></span><br><span class="line"><span class="comment"> * Step 5 计算匹配点旋转角度差所在的直方图</span></span><br><span class="line"><span class="comment"> * Step 6 筛除旋转直方图中“非主流”部分</span></span><br><span class="line"><span class="comment"> * Step 7 将最后通过筛选的匹配好的特征点保存</span></span><br><span class="line"><span class="comment"> * @param[in] F1                        初始化参考帧                  </span></span><br><span class="line"><span class="comment"> * @param[in] F2                        当前帧</span></span><br><span class="line"><span class="comment"> * @param[in &amp; out] vbPrevMatched       本来存储的是参考帧的所有特征点坐标，该函数更新为匹配好的当前帧的特征点坐标</span></span><br><span class="line"><span class="comment"> * @param[in &amp; out] vnMatches12         保存参考帧F1中特征点是否匹配上，index保存是F1对应特征点索引，值保存的是匹配好的F2特征点索引</span></span><br><span class="line"><span class="comment"> * @param[in] windowSize                搜索窗口</span></span><br><span class="line"><span class="comment"> * @return int                          返回成功匹配的特征点数目</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">ORBmatcher::SearchForInitialization</span><span class="params">(Frame &amp;F1, Frame &amp;F2, vector&lt;cv::Point2f&gt; &amp;vbPrevMatched, vector&lt;<span class="type">int</span>&gt; &amp;vnMatches12, <span class="type">int</span> windowSize)</span></span></span><br><span class="line"><span class="function"></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-初始化Initialize"><a href="#3-初始化Initialize" class="headerlink" title="3. 初始化Initialize()"></a>3. 初始化Initialize()</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 计算基础矩阵和单应性矩阵，选取最佳的来恢复出最开始两帧之间的相对姿态，并进行三角化得到初始地图点</span></span><br><span class="line"><span class="comment"> * Step 1 重新记录特征点对的匹配关系</span></span><br><span class="line"><span class="comment"> * Step 2 在所有匹配特征点对中随机选择8对匹配特征点为一组，用于估计H矩阵和F矩阵</span></span><br><span class="line"><span class="comment"> * Step 3 计算fundamental 矩阵 和homography 矩阵，为了加速分别开了线程计算 </span></span><br><span class="line"><span class="comment"> * Step 4 计算得分比例来判断选取哪个模型来求位姿R,t</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Initializer::Initialize</span><span class="params">(<span class="type">const</span> Frame &amp;CurrentFrame, <span class="type">const</span> vector&lt;<span class="type">int</span>&gt; &amp;vMatches12, cv::Mat &amp;R21, cv::Mat &amp;t21,</span></span></span><br><span class="line"><span class="params"><span class="function">                             vector&lt;cv::Point3f&gt; &amp;vP3D, vector&lt;<span class="type">bool</span>&gt; &amp;vbTriangulated)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// Step 1 重新记录特征点对的匹配关系存储在mvMatches12，是否有匹配存储在mvbMatched1</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>, iend=vMatches12.<span class="built_in">size</span>();i&lt;iend; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(vMatches12[i]&gt;=<span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            mvMatches12.<span class="built_in">push_back</span>(<span class="built_in">make_pair</span>(i,vMatches12[i]));</span><br><span class="line">            mvbMatched1[i]=<span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            mvbMatched1[i]=<span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">// Step 2 在所有匹配特征点对中随机选择8对匹配特征点为一组，用于估计H矩阵和F矩阵</span></span><br><span class="line">    mvSets = vector&lt; vector&lt;<span class="type">size_t</span>&gt; &gt;(mMaxIterations,<span class="built_in">vector</span>&lt;<span class="type">size_t</span>&gt;(<span class="number">8</span>,<span class="number">0</span>));</span><br><span class="line">    DUtils::Random::<span class="built_in">SeedRandOnce</span>(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> it=<span class="number">0</span>; it&lt;mMaxIterations; it++)</span><br><span class="line">    &#123;</span><br><span class="line">        vAvailableIndices = vAllIndices;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">size_t</span> j=<span class="number">0</span>; j&lt;<span class="number">8</span>; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> randi = DUtils::Random::<span class="built_in">RandomInt</span>(<span class="number">0</span>,vAvailableIndices.<span class="built_in">size</span>()<span class="number">-1</span>);</span><br><span class="line">            <span class="type">int</span> idx = vAvailableIndices[randi];</span><br><span class="line">            mvSets[it][j] = idx;</span><br><span class="line">            vAvailableIndices[randi] = vAvailableIndices.<span class="built_in">back</span>();</span><br><span class="line">            vAvailableIndices.<span class="built_in">pop_back</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 3 计算fundamental 矩阵 和homography 矩阵，为了加速分别开了线程计算 </span></span><br><span class="line">    vector&lt;<span class="type">bool</span>&gt; vbMatchesInliersH, vbMatchesInliersF;</span><br><span class="line">    <span class="type">float</span> SH, SF;</span><br><span class="line">    cv::Mat H, F;</span><br><span class="line">    <span class="function">thread <span class="title">threadH</span><span class="params">(&amp;Initializer::FindHomography,<span class="keyword">this</span>,ref(vbMatchesInliersH), ref(SH), ref(H))</span></span>;</span><br><span class="line">    <span class="function">thread <span class="title">threadF</span><span class="params">(&amp;Initializer::FindFundamental,<span class="keyword">this</span>,ref(vbMatchesInliersF), ref(SF), ref(F))</span></span>;</span><br><span class="line">    threadH.<span class="built_in">join</span>();</span><br><span class="line">    threadF.<span class="built_in">join</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 4 计算得分比例来判断选取哪个模型来求位姿R,t</span></span><br><span class="line">    <span class="type">float</span> RH = SH/(SH+SF);</span><br><span class="line">    <span class="keyword">if</span>(RH&gt;<span class="number">0.40</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">ReconstructH</span>(vbMatchesInliersH,H,mK,R21,t21,vP3D,vbTriangulated,<span class="number">1.0</span>,<span class="number">50</span>);</span><br><span class="line">    <span class="keyword">else</span> <span class="comment">//if(pF_HF&gt;0.6)</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">ReconstructF</span>(vbMatchesInliersF,F,mK,R21,t21,vP3D,vbTriangulated,<span class="number">1.0</span>,<span class="number">50</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-1-RANSAC算法"><a href="#3-1-RANSAC算法" class="headerlink" title="3.1 RANSAC算法"></a>3.1 RANSAC算法</h3><p>少数外点会极大影响计算结果的准确度.随着采样数量的增加,外点数量也会同时增加,这是一种系统误差,无法通过增加采样点来解决.<br>RANSAC(Random sample consensus,随机采样一致性)算法的思路是少量多次重复实验,每次实验仅使用尽可能少的点来计算,并统计本次计算中的内点数.只要尝试次数足够多的话,总会找到一个包含所有内点的解.</p>
+<p><strong>算法流程：在匹配好的特征点中随机选择8组点对，进行单应矩阵的计算，然后再根据重投影误差为此次随机点计算的R和t评分，在迭代200次的过程中，不断更新评分、R和t，选出最好的结果。</strong></p>
+<h3 id="3-2-计算单应矩阵FindHomography"><a href="#3-2-计算单应矩阵FindHomography" class="headerlink" title="3.2 计算单应矩阵FindHomography()"></a>3.2 计算单应矩阵FindHomography()</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 计算单应矩阵，假设场景为平面情况下通过前两帧求取Homography矩阵，并得到该模型的评分</span></span><br><span class="line"><span class="comment"> * 原理参考Multiple view geometry in computer vision  P109 算法4.4</span></span><br><span class="line"><span class="comment"> * Step 1 将当前帧和参考帧中的特征点坐标进行归一化</span></span><br><span class="line"><span class="comment"> * Step 2 选择8个归一化之后的点对进行迭代</span></span><br><span class="line"><span class="comment"> * Step 3 八点法计算单应矩阵矩阵</span></span><br><span class="line"><span class="comment"> * Step 4 利用重投影误差为当次RANSAC的结果评分</span></span><br><span class="line"><span class="comment"> * Step 5 更新具有最优评分的单应矩阵计算结果,并且保存所对应的特征点对的内点标记</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * @param[in &amp; out] vbMatchesInliers          标记是否是外点</span></span><br><span class="line"><span class="comment"> * @param[in &amp; out] score                     计算单应矩阵的得分</span></span><br><span class="line"><span class="comment"> * @param[in &amp; out] H21                       单应矩阵结果</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Initializer::FindHomography</span><span class="params">(vector&lt;<span class="type">bool</span>&gt; &amp;vbMatchesInliers, <span class="type">float</span> &amp;score, cv::Mat &amp;H21)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// Step 1 将当前帧和参考帧中的特征点坐标进行归一化</span></span><br><span class="line">    vector&lt;cv::Point2f&gt; vPn1, vPn2;</span><br><span class="line">    cv::Mat T1, T2;</span><br><span class="line">    <span class="built_in">Normalize</span>(mvKeys1,vPn1, T1);</span><br><span class="line">    <span class="built_in">Normalize</span>(mvKeys2,vPn2, T2);</span><br><span class="line">    cv::Mat T2inv = T2.<span class="built_in">inv</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Step 2 选择8个归一化之后的点对进行迭代</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> it=<span class="number">0</span>; it&lt;mMaxIterations; it++) &#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">size_t</span> j=<span class="number">0</span>; j&lt;<span class="number">8</span>; j++) &#123;</span><br><span class="line">            <span class="type">int</span> idx = mvSets[it][j];</span><br><span class="line">            vPn1i[j] = vPn1[mvMatches12[idx].first];</span><br><span class="line">            vPn2i[j] = vPn2[mvMatches12[idx].second];</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">		<span class="comment">// Step 3 八点法计算单应矩阵矩阵</span></span><br><span class="line">        cv::Mat Hn = <span class="built_in">ComputeH21</span>(vPn1i,vPn2i);</span><br><span class="line">        H21i = T2inv*Hn*T1;</span><br><span class="line">        H12i = H21i.<span class="built_in">inv</span>();</span><br><span class="line">        </span><br><span class="line">		 <span class="comment">// Step 4 利用重投影误差为当次RANSAC的结果评分</span></span><br><span class="line">        currentScore = <span class="built_in">CheckHomography</span>(H21i, H12i, vbCurrentInliers, mSigma);</span><br><span class="line">		</span><br><span class="line">        <span class="comment">// Step 5 更新具有最优评分的单应矩阵计算结果,并且保存所对应的特征点对的内点标记</span></span><br><span class="line">        <span class="keyword">if</span>(currentScore&gt;score)</span><br><span class="line">        &#123;</span><br><span class="line">            H21 = H21i.<span class="built_in">clone</span>();</span><br><span class="line">            vbMatchesInliers = vbCurrentInliers;</span><br><span class="line">            score = currentScore;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-2-1-归一化"><a href="#3-2-1-归一化" class="headerlink" title="3.2.1 归一化"></a>3.2.1 归一化</h4><p>为什么要进行归一化呢，因为在原始图片中存在噪声，提取的特征点有些数量级差别较大，在随机抽样后，进行H矩阵计算，容易造成系统的不稳定性，所以通过对特征点进行去均值，同时计算这些特征点到均值的平均偏离程度，然后让原始点乘以这个偏离程度的倒数以达到提高稳定性的效果。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Initializer::Normalize</span><span class="params">(<span class="type">const</span> vector&lt;cv::KeyPoint&gt; &amp;vKeys, vector&lt;cv::Point2f&gt; &amp;vNormalizedPoints, cv::Mat &amp;T)</span></span></span><br><span class="line"><span class="function"></span>&#123;	</span><br><span class="line">    <span class="comment">// Step 1 计算特征点X,Y坐标的均值 meanX, meanY</span></span><br><span class="line">    <span class="type">float</span> meanX = <span class="number">0</span>;</span><br><span class="line">    <span class="type">float</span> meanY = <span class="number">0</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> N = vKeys.<span class="built_in">size</span>();</span><br><span class="line">    vNormalizedPoints.<span class="built_in">resize</span>(N);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;N; i++) &#123;</span><br><span class="line">        meanX += vKeys[i].pt.x;</span><br><span class="line">        meanY += vKeys[i].pt.y;</span><br><span class="line">    &#125;</span><br><span class="line">    meanX = meanX/N;</span><br><span class="line">    meanY = meanY/N;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// Step 2 计算特征点X,Y坐标离均值的平均偏离程度 meanDevX, meanDevY，注意不是标准差</span></span><br><span class="line">    <span class="type">float</span> meanDevX = <span class="number">0</span>;</span><br><span class="line">    <span class="type">float</span> meanDevY = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;N; i++) &#123;</span><br><span class="line">        vNormalizedPoints[i].x = vKeys[i].pt.x - meanX;</span><br><span class="line">        vNormalizedPoints[i].y = vKeys[i].pt.y - meanY;</span><br><span class="line">        meanDevX += <span class="built_in">fabs</span>(vNormalizedPoints[i].x);</span><br><span class="line">        meanDevY += <span class="built_in">fabs</span>(vNormalizedPoints[i].y);</span><br><span class="line">    &#125;</span><br><span class="line">    meanDevX = meanDevX/N;</span><br><span class="line">    meanDevY = meanDevY/N;</span><br><span class="line">    <span class="type">float</span> sX = <span class="number">1.0</span>/meanDevX;</span><br><span class="line">    <span class="type">float</span> sY = <span class="number">1.0</span>/meanDevY;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Step 3 将x坐标和y坐标分别进行尺度归一化，使得x坐标和y坐标的一阶绝对矩分别为1 </span></span><br><span class="line">    <span class="comment">// 这里所谓的一阶绝对矩其实就是随机变量到取值的中心的绝对值的平均值（期望）</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        vNormalizedPoints[i].x = vNormalizedPoints[i].x * sX;</span><br><span class="line">        vNormalizedPoints[i].y = vNormalizedPoints[i].y * sY;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-2-2-单应矩阵原理"><a href="#3-2-2-单应矩阵原理" class="headerlink" title="3.2.2 单应矩阵原理"></a>3.2.2 单应矩阵原理</h4><p>设特征点所在的平面为$Ax+By+Cz+D&#x3D;0$，取第一副视图的相机中心为世界原点，将方程同时除以$\sqrt{A^2+B^2+C^2}$得<br>$$<br>\frac{A}{\sqrt{A^2+B^2+C^2}}X+ \frac{B}{\sqrt{A^2+B^2+C^2}}Y+\frac{C}{\sqrt{A^2+B^2+C^2}}Z+\frac{D}{\sqrt{A^2+B^2+C^2}} &#x3D; 0<br>$$<br>其中平面的单位法向量$n$为<br>$$<br>(\frac{A}{\sqrt{A^2+B^2+C^2}}, \frac{B}{\sqrt{A^2+B^2+C^2}},\frac{C}{\sqrt{A^2+B^2+C^2}})<br>$$<br>其中点到平面的距离公式可得到原点到平面的距离$d$<br>$$<br>d &#x3D;\frac{|Ax_1+By_1+Cz_1+D|}{\sqrt{A^2+B^2+C^2}}&#x3D;\frac{|D|}{\sqrt{A^2+B^2+C^2}}<br>$$<br>所以可得<br>$$<br>n^T \cdot\left[\begin{array}{c} X \ Y \ Z \end{array}\right] + d &#x3D; 0 \<br>n^T P+d &#x3D;0<br>$$<br>$P$为平面内的特征点坐标，进一步可得<br>$$<br>-\frac{n^TP}{d} &#x3D; 1<br>$$<br>$p_1,p_2$分别是平面内特征点$P$在第一幅视图中和第二幅视图中的像素坐标，由针孔相机模型可得<br>$$<br>p_2 &#x3D; K(RP+t) \<br>&#x3D;K(RP+t\cdot(-\frac{n^TP}{d})) \<br>&#x3D; K(R-\frac{tn^T}{d})P \<br>&#x3D;  K(R-\frac{tn^T}{d})K^{-1}p_1<br>$$<br>所以把中间部分记作$H$</p>
+<p>我们将它写成矩阵形式，其中$p_1,p_2$写成奇次形式<br>$$<br>\left[\begin{array}{c} u_2 \ v_2 \ 1 \end{array}\right] &#x3D;\left[\begin{array}{c} h_1 &amp; h_2 &amp; h_3 \ h_4 &amp; h_5 &amp; h_6 \ h_7 &amp; h_8 &amp; h_9 \end{array}\right]\left[\begin{array}{c} u_1 \ v_1 \ 1 \end{array}\right]<br>$$<br>展看可得<br>$$<br>u_2 &#x3D; \frac{h_1u_1+h_2v_2+h_3}{h_7u_1+h_8v_1+h_9} \<br>v_2 &#x3D; \frac{h_4u_1+h_5v_1+h_6}{h_7u_1+h_8v_1+h_9}<br>$$<br>整理可得<br>$$<br>\left[\begin{array}{c} 0 &amp; 0 &amp; 0 &amp; -u_1 &amp; -v_1 &amp; -1 &amp; u_1v_2 &amp; v_1v_2 &amp; v_2  \ u_1 &amp; v_1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; -u_1u_2  &amp; -v_1u_2 &amp; -u_2  \end{array}\right] \left[\begin{array}{c} h_1 \ h_2 \ h_3 \ h_4 \ h_5 \ h_6 \ h_7 \ h_8 \ h_9 \end{array}\right] &#x3D; 0<br>$$<br>等式左边两项分别用A, X表示,则有<br>$$<br>AX&#x3D;0<br>$$<br>一对点提供两个约束等式,单应矩阵H总共有9个元素,8个自由度(尺度等价性),所以需要4对点提供8个约束方程就可以求解，然后通过SVD分解。</p>
+<h4 id="3-2-3-重投影误差及卡方检验计算置信度得分"><a href="#3-2-3-重投影误差及卡方检验计算置信度得分" class="headerlink" title="3.2.3 重投影误差及卡方检验计算置信度得分"></a>3.2.3 重投影误差及卡方检验计算置信度得分</h4><p>卡方检验通过构造检验统计量$\chi^2$来比较期望结果和实际结果之间的差别，从而得出观察频数极值的发生概率<br>$$<br>\chi^2 &#x3D; \sum{\frac{(O-E)^2}{E}}<br>$$<br>$O$代表观察到的频数,也就是实际发生的频数。E代表期望频数。</p>
+<p><strong>检验统计量$\chi^2$意义</strong>：$O$与$E$之间差值越小,检验统计量$\chi^2$越小。以$E$为除数,令差值与期望频数成比例。<br>        <strong>卡方检验的标准：</strong>如果统计量$\chi^2$很小，说明观察频数和期望频数之间的差别不显著,统计量越大,差别越显著。</p>
+<p><img src="/%EF%BC%88%E5%9B%9B%EF%BC%89%E5%8D%95%E7%9B%AE%E5%88%9D%E5%A7%8B%E5%8C%96.assets/image.W64PV1.png" alt="image.W64PV1"></p>
+<p><strong>ORB-SLAM2中的卡方检测剔除外点策略</strong></p>
+<p>根据重投影误差构造统计量$\chi^2$，其值越大,观察结果和期望结果之间的差别越显著,某次计算就越可能用是外点。</p>
+<p>统计量置信度阈值与被检验变量自由度有关: 单目特征点重投影误差的自由度为 <strong>2 ( u , v )</strong>,双目特征点重投影误差自由度为 **3 ( u , v , ur )**。取95%置信度下的卡方检验统计量阈值。<br>        若统计量大于该阈值,则认为计算矩阵使用到了外点,将其分数设为 0；<br>        若统计量小于该阈值,则将统计量裕量设为该解的置信度分数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">float</span> <span class="title">Initializer::CheckHomography</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Step 1 获取从参考帧到当前帧的单应矩阵的各个元素</span></span><br><span class="line">    <span class="type">const</span> <span class="type">float</span> h11 = H21.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="type">const</span> <span class="type">float</span> h12 = H21.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 自由度为2的卡方分布，显著性水平为0.05，对应的临界阈值</span></span><br><span class="line">    <span class="type">const</span> <span class="type">float</span> th = <span class="number">5.991</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2 通过H矩阵，进行参考帧和当前帧之间的双向投影，并计算起加权重投影误差</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">		<span class="comment">// 一开始都默认为Inlier</span></span><br><span class="line">        <span class="type">bool</span> bIn = <span class="literal">true</span>;</span><br><span class="line">		<span class="comment">// Step 2.1 提取参考帧和当前帧之间的特征匹配点对</span></span><br><span class="line">        <span class="type">const</span> cv::KeyPoint &amp;kp1 = mvKeys1[mvMatches12[i].first];</span><br><span class="line">        <span class="type">const</span> cv::KeyPoint &amp;kp2 = mvKeys2[mvMatches12[i].second];</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> u1 = kp1.pt.x;</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> v1 = kp1.pt.y;</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> u2 = kp2.pt.x;</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> v2 = kp2.pt.y;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 2.2 计算 img2 到 img1 的重投影误差</span></span><br><span class="line">        <span class="comment">// x1 = H12*x2</span></span><br><span class="line">        <span class="comment">// 将图像2中的特征点通过单应变换投影到图像1中</span></span><br><span class="line">        <span class="comment">// |u1|   |h11inv h12inv h13inv||u2|   |u2in1|</span></span><br><span class="line">        <span class="comment">// |v1| = |h21inv h22inv h23inv||v2| = |v2in1| * w2in1inv</span></span><br><span class="line">        <span class="comment">// |1 |   |h31inv h32inv h33inv||1 |   |  1  |</span></span><br><span class="line">		<span class="comment">// 计算投影归一化坐标</span></span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> w2in1inv = <span class="number">1.0</span>/(h31inv * u2 + h32inv * v2 + h33inv);</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> u2in1 = (h11inv * u2 + h12inv * v2 + h13inv) * w2in1inv;</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> v2in1 = (h21inv * u2 + h22inv * v2 + h23inv) * w2in1inv;</span><br><span class="line">   </span><br><span class="line">        <span class="comment">// 计算重投影误差 = ||p1(i) - H12 * p2(i)||2</span></span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> squareDist1 = (u1 - u2in1) * (u1 - u2in1) + (v1 - v2in1) * (v1 - v2in1);</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> chiSquare1 = squareDist1 * invSigmaSquare;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 2.3 用阈值标记离群点，内点的话累加得分</span></span><br><span class="line">        <span class="keyword">if</span>(chiSquare1&gt;th)</span><br><span class="line">            bIn = <span class="literal">false</span>;    </span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// 误差越大，得分越低</span></span><br><span class="line">            score += th - chiSquare1;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 计算从img1 到 img2 的投影变换误差</span></span><br><span class="line">        <span class="comment">// x1in2 = H21*x1</span></span><br><span class="line">        <span class="comment">// 将图像2中的特征点通过单应变换投影到图像1中</span></span><br><span class="line">        <span class="comment">// |u2|   |h11 h12 h13||u1|   |u1in2|</span></span><br><span class="line">        <span class="comment">// |v2| = |h21 h22 h23||v1| = |v1in2| * w1in2inv</span></span><br><span class="line">        <span class="comment">// |1 |   |h31 h32 h33||1 |   |  1  |</span></span><br><span class="line">		<span class="comment">// 计算投影归一化坐标</span></span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> w1in2inv = <span class="number">1.0</span>/(h31*u1+h32*v1+h33);</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> u1in2 = (h11*u1+h12*v1+h13)*w1in2inv;</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> v1in2 = (h21*u1+h22*v1+h23)*w1in2inv;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 计算重投影误差 </span></span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> squareDist2 = (u2-u1in2)*(u2-u1in2)+(v2-v1in2)*(v2-v1in2);</span><br><span class="line">        <span class="type">const</span> <span class="type">float</span> chiSquare2 = squareDist2*invSigmaSquare;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 用阈值标记离群点，内点的话累加得分</span></span><br><span class="line">        <span class="keyword">if</span>(chiSquare2&gt;th)</span><br><span class="line">            bIn = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            score += th - chiSquare2;   </span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 2.4 如果从img2 到 img1 和 从img1 到img2的重投影误差均满足要求，则说明是Inlier point</span></span><br><span class="line">        <span class="keyword">if</span>(bIn)</span><br><span class="line">            vbMatchesInliers[i]=<span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            vbMatchesInliers[i]=<span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> score;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-计算基础矩阵FindFundamental"><a href="#3-3-计算基础矩阵FindFundamental" class="headerlink" title="3.3 计算基础矩阵FindFundamental()"></a>3.3 计算基础矩阵FindFundamental()</h3><p>基础矩阵的计算流程和单应矩阵的流程是一样的，只有在基础矩阵的计算上不一样。</p>
+<h4 id="3-3-1-基础矩阵原理"><a href="#3-3-1-基础矩阵原理" class="headerlink" title="3.3.1 基础矩阵原理"></a>3.3.1 基础矩阵原理</h4><h4 id=""><a href="#" class="headerlink" title=""></a><img src="/%EF%BC%88%E5%9B%9B%EF%BC%89%E5%8D%95%E7%9B%AE%E5%88%9D%E5%A7%8B%E5%8C%96.assets/image.P7MUV1.png" alt="image.P7MUV1"></h4><p>设空间中一点P的位置为<br>$$<br>P &#x3D; \left[ \begin{array}{c} X &amp; Y &amp; Z\end{array}\right]^T<br>$$<br>根据针孔相机模型，我们知道两个像素点$p_1,p_2$的像素位置可以表示为<br>$$<br>s_1p_1 &#x3D; KP  ，\space s_2p_2 &#x3D; K(RP+t)<br>$$<br>对于$s_1,s_2$我们称为尺度因子，$s_1p_1$和$p_1$成投影关系，他们在齐次坐标系下的意义是相等的，因此，<br>$$<br>p_1 &#x3D; KP  ，\space p_2 &#x3D; K(RP+t)<br>$$<br>取<br>$$<br>x_1 &#x3D; K^{-1}p_1, \space x_2&#x3D;K^{-1}p_2<br>$$<br>这里的$x_1,x_2$是两个像素点的归一化坐标，代入上式中，得<br>$$<br>x_2 &#x3D; Rx_1+t \<br>$$<br>两边同时左乘$t^{\wedge}$,在左乘$x_2^{T}$,得<br>$$<br>x_2^{T}t^{\wedge}x_2 &#x3D; x_2^{T}t^{\wedge}Rx_1+x_2^{T}t^{\wedge}t<br>$$<br>其中等式左边$t^{\wedge}x_2$是一个与$t$和$x_2$都垂直的向量，他再和$x_2$做内积，那么就为零，等是右边第二项$t$叉乘自己也为零，所以可以得出<br>$$<br>x_2^{T}t^{\wedge}Rx_1 &#x3D; 0<br>$$<br>将$x_1,x_2$带入进去得<br>$$<br>p_2^{T}K^{-T}_2t^{\wedge}RK^{-1}_1p_1 &#x3D;p_2^{T}Fp_1 &#x3D; 0<br>$$<br>我们将它写成矩阵形式<br>$$<br>\left[\begin{array}{c} u_2 &amp; v_2 &amp; 1 \end{array}\right]\left[\begin{array}{c} f_1 &amp; f_2 &amp; f_3 \ f_4 &amp; f_5 &amp; f_6 \ f_7 &amp; f_8 &amp; f_9 \end{array}\right]\left[\begin{array}{c} u_1 \ v_1 \ 1 \end{array}\right]&#x3D;0<br>$$<br>最后把它展开，重新写成下面的形式<br>$$<br>\left[\begin{array}{c} u_1u_2 &amp; v_1u_2 &amp; u_2 &amp; u_1v_2 &amp; v_1v_2 &amp; v_2 &amp; u_1 &amp; v_1 &amp; 1 \end{array}\right] \left[\begin{array}{c} f_1 \ f_2 \ f_3 \ f_4 \ f_5 \ f_6 \ f_7 \ f_8 \ f_9 \  \end{array}\right] &#x3D; 0<br>$$<br>然后通过八点法，构造方程，最后通过SVD进行分解。</p>
+<h3 id="3-4-单应矩阵ReconstructH-恢复R、t"><a href="#3-4-单应矩阵ReconstructH-恢复R、t" class="headerlink" title="3.4 单应矩阵ReconstructH()恢复R、t"></a>3.4 单应矩阵ReconstructH()恢复R、t</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 用H矩阵恢复R, t和三维点</span></span><br><span class="line"><span class="comment"> * H矩阵分解常见有两种方法：Faugeras SVD-based decomposition 和 Zhang SVD-based decomposition</span></span><br><span class="line"><span class="comment"> * 代码使用了Faugeras SVD-based decomposition算法，参考文献</span></span><br><span class="line"><span class="comment"> * Motion and structure from motion in a piecewise planar environment. International Journal of Pattern Recognition and Artificial Intelligence, 1988 </span></span><br><span class="line"><span class="comment">      流程:</span></span><br><span class="line"><span class="comment">          1. 根据H矩阵的奇异值d&#x27;= d2 或者 d&#x27; = -d2 分别计算 H 矩阵分解的 8 组解</span></span><br><span class="line"><span class="comment">            1.1 讨论 d&#x27; &gt; 0 时的 4 组解</span></span><br><span class="line"><span class="comment">            1.2 讨论 d&#x27; &lt; 0 时的 4 组解</span></span><br><span class="line"><span class="comment">          2. 对 8 组解进行验证，并选择产生相机前方最多3D点的解为最优解</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Initializer::ReconstructH</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> N=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>, iend = vbMatchesInliers.<span class="built_in">size</span>() ; i&lt;iend; i++)</span><br><span class="line">        <span class="keyword">if</span>(vbMatchesInliers[i]) N++;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// step1 SVD分解单应矩阵</span></span><br><span class="line">    cv::Mat invK = K.<span class="built_in">inv</span>();</span><br><span class="line">    cv::Mat A = invK*H21*K;</span><br><span class="line">    cv::Mat U,w,Vt,V;</span><br><span class="line">    cv::SVD::<span class="built_in">compute</span>(A,w,U,Vt,cv::SVD::FULL_UV);</span><br><span class="line">    V=Vt.<span class="built_in">t</span>();</span><br><span class="line">    <span class="type">float</span> s = cv::<span class="built_in">determinant</span>(U)*cv::<span class="built_in">determinant</span>(Vt);</span><br><span class="line">    <span class="type">float</span> d1 = w.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>);</span><br><span class="line">    <span class="type">float</span> d2 = w.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>);</span><br><span class="line">    <span class="type">float</span> d3 = w.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">if</span>(d1/d2&lt;<span class="number">1.00001</span> || d2/d3&lt;<span class="number">1.00001</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    vector&lt;cv::Mat&gt; vR, vt, vn;</span><br><span class="line">    vR.<span class="built_in">reserve</span>(<span class="number">8</span>);</span><br><span class="line">    vt.<span class="built_in">reserve</span>(<span class="number">8</span>);</span><br><span class="line">    vn.<span class="built_in">reserve</span>(<span class="number">8</span>);</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// step2 根据奇异值的大小分别计算R，t</span></span><br><span class="line">    <span class="comment">//n&#x27;=[x1 0 x3] 4 posibilities e1=e3=1, e1=1 e3=-1, e1=-1 e3=1, e1=e3=-1</span></span><br><span class="line">    <span class="type">float</span> aux1 = <span class="built_in">sqrt</span>((d1*d1-d2*d2)/(d1*d1-d3*d3));</span><br><span class="line">    <span class="type">float</span> aux3 = <span class="built_in">sqrt</span>((d2*d2-d3*d3)/(d1*d1-d3*d3));</span><br><span class="line">    <span class="type">float</span> x1[] = &#123;aux1,aux1,-aux1,-aux1&#125;;</span><br><span class="line">    <span class="type">float</span> x3[] = &#123;aux3,-aux3,aux3,-aux3&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2.1 讨论 d&#x27; &gt; 0 时的 4 组解</span></span><br><span class="line">    <span class="type">float</span> aux_stheta = <span class="built_in">sqrt</span>((d1*d1-d2*d2)*(d2*d2-d3*d3))/((d1+d3)*d2);</span><br><span class="line">    <span class="type">float</span> ctheta = (d2*d2+d1*d3)/((d1+d3)*d2);</span><br><span class="line">    <span class="type">float</span> stheta[] = &#123;aux_stheta, -aux_stheta, -aux_stheta, aux_stheta&#125;;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">4</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// Step 1.2 讨论 d&#x27; &lt; 0 时的 4 组解</span></span><br><span class="line">    <span class="type">float</span> aux_sphi = <span class="built_in">sqrt</span>((d1*d1-d2*d2)*(d2*d2-d3*d3))/((d1-d3)*d2);</span><br><span class="line">    <span class="type">float</span> cphi = (d1*d3-d2*d2)/((d1-d3)*d2);</span><br><span class="line">    <span class="type">float</span> sphi[] = &#123;aux_sphi, -aux_sphi, -aux_sphi, aux_sphi&#125;;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">4</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 3. 对 8 组解进行验证，并选择产生相机前方最多3D点的解为最优解</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>; i&lt;<span class="number">8</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">float</span> parallaxi;</span><br><span class="line">        vector&lt;cv::Point3f&gt; vP3Di;</span><br><span class="line">        vector&lt;<span class="type">bool</span>&gt; vbTriangulatedi;</span><br><span class="line">        <span class="comment">// step 3.1 计算good点的数目</span></span><br><span class="line">        <span class="type">int</span> nGood = <span class="built_in">CheckRT</span>(vR[i],vt[i],mvKeys1,mvKeys2,mvMatches12,vbMatchesInliers,K,vP3Di, <span class="number">4.0</span>*mSigma2, vbTriangulatedi, parallaxi);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(nGood&gt;bestGood)</span><br><span class="line">        &#123;</span><br><span class="line">            secondBestGood = bestGood;</span><br><span class="line">            bestGood = nGood;</span><br><span class="line">            bestSolutionIdx = i;</span><br><span class="line">            bestParallax = parallaxi;</span><br><span class="line">            bestP3D = vP3Di;</span><br><span class="line">            bestTriangulated = vbTriangulatedi;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(nGood&gt;secondBestGood)</span><br><span class="line">        &#123;</span><br><span class="line">            secondBestGood = nGood;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Step 4 选择最优解。要满足下面的四个条件</span></span><br><span class="line">    <span class="comment">// 1. good点数最优解明显大于次优解，这里取0.75经验值</span></span><br><span class="line">    <span class="comment">// 2. 视角差大于规定的阈值</span></span><br><span class="line">    <span class="comment">// 3. good点数要大于规定的最小的被三角化的点数量</span></span><br><span class="line">    <span class="comment">// 4. good数要足够多，达到总数的90%以上</span></span><br><span class="line">    <span class="keyword">if</span>(secondBestGood&lt;<span class="number">0.75</span>*bestGood &amp;&amp; bestParallax&gt;=minParallax &amp;&amp; bestGood&gt;minTriangulated &amp;&amp; bestGood&gt;<span class="number">0.9</span>*N)</span><br><span class="line">    &#123;</span><br><span class="line">        vR[bestSolutionIdx].<span class="built_in">copyTo</span>(R21);</span><br><span class="line">        vt[bestSolutionIdx].<span class="built_in">copyTo</span>(t21);</span><br><span class="line">        vP3D = bestP3D;</span><br><span class="line">        vbTriangulated = bestTriangulated;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-4-1-检验分解结果CheckRT"><a href="#3-4-1-检验分解结果CheckRT" class="headerlink" title="3.4.1 检验分解结果CheckRT()"></a>3.4.1 检验分解结果CheckRT()</h4><p>通过成功三角化的特征点个数判断分解结果的好坏: 若某特征点的重投影误差小于 4 且视差角大于 0.36° ,则认为该特征点三角化成功</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">Initializer::CheckRT</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   	<span class="comment">// step1 计算相机的投影矩阵</span></span><br><span class="line">    <span class="comment">// 投影矩阵P是一个 3x4 的矩阵，可以将空间中的一个点投影到平面上，获得其平面坐标，这里均指的是齐次坐标。</span></span><br><span class="line">    <span class="comment">// 对于第一个相机是 P1=K*[I|0]</span></span><br><span class="line">    <span class="comment">// 以第一个相机的光心作为世界坐标系, 定义相机的投影矩阵</span></span><br><span class="line">    <span class="function">cv::Mat <span class="title">P1</span><span class="params">(<span class="number">3</span>,<span class="number">4</span>,CV_32F,cv::Scalar(<span class="number">0</span>))</span></span>;</span><br><span class="line">    K.<span class="built_in">copyTo</span>(P1.<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>).<span class="built_in">colRange</span>(<span class="number">0</span>,<span class="number">3</span>));</span><br><span class="line">    cv::Mat O1 = cv::Mat::<span class="built_in">zeros</span>(<span class="number">3</span>,<span class="number">1</span>,CV_32F); <span class="comment">// 第一个相机的光心设置为世界坐标系下的原点</span></span><br><span class="line">    <span class="comment">// 计算第二个相机的投影矩阵 P2=K*[R|t]</span></span><br><span class="line">    <span class="function">cv::Mat <span class="title">P2</span><span class="params">(<span class="number">3</span>,<span class="number">4</span>,CV_32F)</span></span>;</span><br><span class="line">    R.<span class="built_in">copyTo</span>(P2.<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>).<span class="built_in">colRange</span>(<span class="number">0</span>,<span class="number">3</span>));</span><br><span class="line">    t.<span class="built_in">copyTo</span>(P2.<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>).<span class="built_in">col</span>(<span class="number">3</span>));</span><br><span class="line">    P2 = K*P2;</span><br><span class="line">    cv::Mat O2 = -R.<span class="built_in">t</span>()*t; <span class="comment">// 第二个相机的光心在世界坐标系下的坐标</span></span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 开始遍历所有的特征点对</span></span><br><span class="line">    <span class="type">int</span> nGood=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>, iend=vMatches12.<span class="built_in">size</span>();i&lt;iend;i++) &#123;</span><br><span class="line">        <span class="comment">// step2. 三角化地图点</span></span><br><span class="line">        <span class="type">const</span> cv::KeyPoint &amp;kp1 = vKeys1[vMatches12[i].first];</span><br><span class="line">        <span class="type">const</span> cv::KeyPoint &amp;kp2 = vKeys2[vMatches12[i].second];</span><br><span class="line">        cv::Mat p3dC1;</span><br><span class="line">        <span class="built_in">Triangulate</span>(kp1,kp2,P1,P2,p3dC1);</span><br><span class="line">		</span><br><span class="line">        <span class="comment">// step3. 检查三角化坐标点合法性:</span></span><br><span class="line">		<span class="comment">// step3.1. 正确三角化的地图点深度值应为正数且视差角足够大</span></span><br><span class="line">        <span class="keyword">if</span>(!<span class="built_in">isfinite</span>(p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>)) || !<span class="built_in">isfinite</span>(p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>)) || !<span class="built_in">isfinite</span>(p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>))) &#123;</span><br><span class="line">            vbGood[vMatches12[i].first]=<span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 3.2 通过三维点深度值正负、两相机光心视差角大小来检查是否合法 </span></span><br><span class="line">        cv::Mat normal1 = p3dC1 - O1;</span><br><span class="line">        <span class="type">float</span> dist1 = cv::<span class="built_in">norm</span>(normal1);</span><br><span class="line">        cv::Mat normal2 = p3dC1 - O2;</span><br><span class="line">        <span class="type">float</span> dist2 = cv::<span class="built_in">norm</span>(normal2);</span><br><span class="line">        <span class="type">float</span> cosParallax = normal1.<span class="built_in">dot</span>(normal2)/(dist1*dist2);</span><br><span class="line">        <span class="comment">// 小于0.36度的视差角，都被认为太差了</span></span><br><span class="line">        <span class="keyword">if</span>(p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>)&lt;=<span class="number">0</span> &amp;&amp; cosParallax&lt;<span class="number">0.99998</span>)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        cv::Mat p3dC2 = R*p3dC1+t;</span><br><span class="line">        <span class="keyword">if</span>(p3dC2.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>)&lt;=<span class="number">0</span> &amp;&amp; cosParallax&lt;<span class="number">0.99998</span>)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// step3.3 正确三角化的地图点重投影误差应足够小ge</span></span><br><span class="line">        <span class="type">float</span> im1x, im1y;</span><br><span class="line">        <span class="type">float</span> invZ1 = <span class="number">1.0</span>/p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>);</span><br><span class="line">        im1x = fx*p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>)*invZ1+cx;</span><br><span class="line">        im1y = fy*p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>)*invZ1+cy;</span><br><span class="line">        <span class="type">float</span> squareError1 = (im1x-kp1.pt.x)*(im1x-kp1.pt.x)+(im1y-kp1.pt.y)*(im1y-kp1.pt.y);</span><br><span class="line">        <span class="keyword">if</span>(squareError1&gt;th2)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        <span class="type">float</span> im2x, im2y;</span><br><span class="line">        <span class="type">float</span> invZ2 = <span class="number">1.0</span>/p3dC2.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>);</span><br><span class="line">        im2x = fx*p3dC2.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>)*invZ2+cx;</span><br><span class="line">        im2y = fy*p3dC2.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>)*invZ2+cy;</span><br><span class="line">        <span class="type">float</span> squareError2 = (im2x-kp2.pt.x)*(im2x-kp2.pt.x)+(im2y-kp2.pt.y)*(im2y-kp2.pt.y);</span><br><span class="line">        <span class="keyword">if</span>(squareError2&gt;th2)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        </span><br><span class="line">		<span class="comment">// step4. 记录通过检验的地图点</span></span><br><span class="line">        vCosParallax.<span class="built_in">push_back</span>(cosParallax);</span><br><span class="line">        vP3D[vMatches12[i].first] = cv::<span class="built_in">Point3f</span>(p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>),p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>),p3dC1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>));</span><br><span class="line">        nGood++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(cosParallax&lt;<span class="number">0.99998</span>)</span><br><span class="line">            vbGood[vMatches12[i].first]=<span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// step5. 记录三角化过程中的较小(第50个视差角)</span></span><br><span class="line">    <span class="keyword">if</span>(nGood&gt;<span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">sort</span>(vCosParallax.<span class="built_in">begin</span>(),vCosParallax.<span class="built_in">end</span>());</span><br><span class="line">        <span class="type">size_t</span> idx = <span class="built_in">min</span>(<span class="number">50</span>,<span class="built_in">int</span>(vCosParallax.<span class="built_in">size</span>()<span class="number">-1</span>));</span><br><span class="line">        parallax = <span class="built_in">acos</span>(vCosParallax[idx])*<span class="number">180</span>/CV_PI;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        parallax=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> nGood;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="（1）相机光心的确定"><a href="#（1）相机光心的确定" class="headerlink" title="（1）相机光心的确定"></a><strong>（1）相机光心的确定</strong></h5><p>在计算投影矩阵的过程中需要计算两个相机的光心</p>
+<p>其中设第一个相机的光心设置为世界坐标系下的原点<code>O1 = cv::Mat::zeros(3,1,CV_32F)</code>，设第二个相机的光心在世界坐标系下的坐标<code>O2 = -R.t()*t</code> </p>
+<p>其中第2个相机光心在第1个相机下的坐标为<br>$$<br>T_{2 1} &#x3D;\left[ \begin{array}{c} R_{2 1} &amp; t_{2 1} \ 0^T &amp; 1\end{array}\right]<br>$$</p>
+<p>$$<br>T_{1 2}&#x3D; T^{-1}<em>{2 1} &#x3D;\left[ \begin{array}{c} R^{T}</em>{2 1} &amp; -R^{T}<em>{2 1}t</em>{2 1} \ 0^T &amp; 1\end{array}\right] \<br>t_{1 2 } &#x3D; -R^{T}<em>{2 1}t</em>{2 1}<br>$$</p>
+<h5 id="（2）单目投影恢复3D点"><a href="#（2）单目投影恢复3D点" class="headerlink" title="（2）单目投影恢复3D点"></a>（2）单目投影恢复3D点</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Initializer::Triangulate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 原理</span></span><br><span class="line">    <span class="comment">// Trianularization: 已知匹配特征点对&#123;x x&#x27;&#125; 和 各自相机矩阵&#123;P P&#x27;&#125;, 估计三维点 X</span></span><br><span class="line">    <span class="comment">// x&#x27; = P&#x27;X  x = PX</span></span><br><span class="line">    <span class="comment">// 它们都属于 x = aPX模型</span></span><br><span class="line">    <span class="comment">//                         |X|</span></span><br><span class="line">    <span class="comment">// |x|     |p1 p2  p3  p4 ||Y|     |x|    |--p0--||.|</span></span><br><span class="line">    <span class="comment">// |y| = a |p5 p6  p7  p8 ||Z| ===&gt;|y| = a|--p1--||X|</span></span><br><span class="line">    <span class="comment">// |z|     |p9 p10 p11 p12||1|     |z|    |--p2--||.|</span></span><br><span class="line">    <span class="comment">// 采用DLT的方法：x叉乘PX = 0</span></span><br><span class="line">    <span class="comment">// |yp2 -  p1|     |0|</span></span><br><span class="line">    <span class="comment">// |p0 -  xp2| X = |0|</span></span><br><span class="line">    <span class="comment">// |xp1 - yp0|     |0|</span></span><br><span class="line">    <span class="comment">// 两个点:</span></span><br><span class="line">    <span class="comment">// |yp2   -  p1  |     |0|</span></span><br><span class="line">    <span class="comment">// |p0    -  xp2 | X = |0| ===&gt; AX = 0</span></span><br><span class="line">    <span class="comment">// |y&#x27;p2&#x27; -  p1&#x27; |     |0|</span></span><br><span class="line">    <span class="comment">// |p0&#x27;   - x&#x27;p2&#x27;|     |0|</span></span><br><span class="line">    <span class="comment">// 变成程序中的形式：</span></span><br><span class="line">    <span class="comment">// |xp2  - p0 |     |0|</span></span><br><span class="line">    <span class="comment">// |yp2  - p1 | X = |0| ===&gt; AX = 0</span></span><br><span class="line">    <span class="comment">// |x&#x27;p2&#x27;- p0&#x27;|     |0|</span></span><br><span class="line">    <span class="comment">// |y&#x27;p2&#x27;- p1&#x27;|     |0|</span></span><br><span class="line">    <span class="comment">// 然后就组成了一个四元一次正定方程组，SVD求解，右奇异矩阵的最后一行就是最终的解.</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//这个就是上面注释中的矩阵A</span></span><br><span class="line">    <span class="function">cv::Mat <span class="title">A</span><span class="params">(<span class="number">4</span>,<span class="number">4</span>,CV_32F)</span></span>;</span><br><span class="line">	<span class="comment">//构造参数矩阵A</span></span><br><span class="line">    A.<span class="built_in">row</span>(<span class="number">0</span>) = kp1.pt.x*P1.<span class="built_in">row</span>(<span class="number">2</span>)-P1.<span class="built_in">row</span>(<span class="number">0</span>);</span><br><span class="line">    A.<span class="built_in">row</span>(<span class="number">1</span>) = kp1.pt.y*P1.<span class="built_in">row</span>(<span class="number">2</span>)-P1.<span class="built_in">row</span>(<span class="number">1</span>);</span><br><span class="line">    A.<span class="built_in">row</span>(<span class="number">2</span>) = kp2.pt.x*P2.<span class="built_in">row</span>(<span class="number">2</span>)-P2.<span class="built_in">row</span>(<span class="number">0</span>);</span><br><span class="line">    A.<span class="built_in">row</span>(<span class="number">3</span>) = kp2.pt.y*P2.<span class="built_in">row</span>(<span class="number">2</span>)-P2.<span class="built_in">row</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//奇异值分解的结果</span></span><br><span class="line">    cv::Mat u,w,vt;</span><br><span class="line">	<span class="comment">//对系数矩阵A进行奇异值分解</span></span><br><span class="line">    cv::SVD::<span class="built_in">compute</span>(A,w,u,vt,cv::SVD::MODIFY_A| cv::SVD::FULL_UV);</span><br><span class="line">	<span class="comment">//根据前面的结论，奇异值分解右矩阵的最后一行其实就是解，原理类似于前面的求最小二乘解，四个未知数四个方程正好正定</span></span><br><span class="line">	<span class="comment">//别忘了我们更习惯用列向量来表示一个点的空间坐标</span></span><br><span class="line">    x3D = vt.<span class="built_in">row</span>(<span class="number">3</span>).<span class="built_in">t</span>();</span><br><span class="line">	<span class="comment">//为了符合其次坐标的形式，使最后一维为1</span></span><br><span class="line">    x3D = x3D.<span class="built_in">rowRange</span>(<span class="number">0</span>,<span class="number">3</span>)/x3D.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">3</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-基础矩阵ReconstructF-恢复R、t"><a href="#3-5-基础矩阵ReconstructF-恢复R、t" class="headerlink" title="3.5 基础矩阵ReconstructF()恢复R、t"></a>3.5 基础矩阵ReconstructF()恢复R、t</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Initializer::ReconstructF</span><span class="params">(vector&lt;<span class="type">bool</span>&gt; &amp;vbMatchesInliers, cv::Mat &amp;F21, cv::Mat &amp;K,</span></span></span><br><span class="line"><span class="params"><span class="function">                            cv::Mat &amp;R21, cv::Mat &amp;t21, vector&lt;cv::Point3f&gt; &amp;vP3D, vector&lt;<span class="type">bool</span>&gt; &amp;vbTriangulated, <span class="type">float</span> minParallax, <span class="type">int</span> minTriangulated)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// Step 1 统计有效匹配点个数，并用 N 表示</span></span><br><span class="line">    <span class="type">int</span> N=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> i=<span class="number">0</span>, iend = vbMatchesInliers.<span class="built_in">size</span>() ; i&lt;iend; i++)</span><br><span class="line">        <span class="keyword">if</span>(vbMatchesInliers[i]) N++;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2 根据基础矩阵和相机的内参数矩阵计算本质矩阵</span></span><br><span class="line">    cv::Mat E21 = K.<span class="built_in">t</span>()*F21*K;</span><br><span class="line">    <span class="comment">// 定义本质矩阵分解结果，形成四组解,分别是：</span></span><br><span class="line">    cv::Mat R1, R2, t;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 3 从本质矩阵求解两个R解和两个t解，共四组解</span></span><br><span class="line">    <span class="built_in">DecomposeE</span>(E21,R1,R2,t);  </span><br><span class="line">    cv::Mat t1=t;</span><br><span class="line">    cv::Mat t2=-t;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 4 分别验证求解的4种R和t的组合，选出最佳组合</span></span><br><span class="line">    <span class="comment">// 原理：若某一组合使恢复得到的3D点位于相机正前方的数量最多，那么该组合就是最佳组合</span></span><br><span class="line">    <span class="comment">// 实现：根据计算的解组合成为四种情况,并依次调用 Initializer::CheckRT() 进行检查,得到可以进行三角化测量的点的数目</span></span><br><span class="line">    vector&lt;cv::Point3f&gt; vP3D1, vP3D2, vP3D3, vP3D4;</span><br><span class="line">    vector&lt;<span class="type">bool</span>&gt; vbTriangulated1,vbTriangulated2,vbTriangulated3, vbTriangulated4;</span><br><span class="line">    <span class="type">float</span> parallax1,parallax2, parallax3, parallax4;</span><br><span class="line">	<span class="comment">// Step 4.1 使用同样的匹配点分别检查四组解，记录当前计算的3D点在摄像头前方且投影误差小于阈值的个数，记为有效3D点个数</span></span><br><span class="line">    <span class="type">int</span> nGood1 = <span class="built_in">CheckRT</span>()</span><br><span class="line">    <span class="type">int</span> nGood2 = <span class="built_in">CheckRT</span>(R2,t1,mvKeys1,mvKeys2,mvMatches12,vbMatchesInliers,K, vP3D2, <span class="number">4.0</span>*mSigma2, vbTriangulated2, parallax2);</span><br><span class="line">    <span class="type">int</span> nGood3 = <span class="built_in">CheckRT</span>(R1,t2,mvKeys1,mvKeys2,mvMatches12,vbMatchesInliers,K, vP3D3, <span class="number">4.0</span>*mSigma2, vbTriangulated3, parallax3);</span><br><span class="line">    <span class="type">int</span> nGood4 = <span class="built_in">CheckRT</span>(R2,t2,mvKeys1,mvKeys2,mvMatches12,vbMatchesInliers,K, vP3D4, <span class="number">4.0</span>*mSigma2, vbTriangulated4, parallax4);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 4.2 选取最大可三角化测量的点的数目</span></span><br><span class="line">    <span class="type">int</span> maxGood = <span class="built_in">max</span>(nGood1,<span class="built_in">max</span>(nGood2,<span class="built_in">max</span>(nGood3,nGood4)));</span><br><span class="line">    R21 = cv::<span class="built_in">Mat</span>();</span><br><span class="line">    t21 = cv::<span class="built_in">Mat</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 4.3 确定最小的可以三角化的点数 </span></span><br><span class="line">    <span class="comment">// 在0.9倍的内点数 和 指定值minTriangulated =50 中取最大的，也就是说至少50个</span></span><br><span class="line">    <span class="type">int</span> nMinGood = <span class="built_in">max</span>(<span class="built_in">static_cast</span>&lt;<span class="type">int</span>&gt;(<span class="number">0.9</span>*N), minTriangulated);</span><br><span class="line">	<span class="comment">// 统计四组解中重建的有效3D点个数 &gt; 0.7 * maxGood 的解的数目</span></span><br><span class="line">    <span class="comment">// 如果有多个解同时满足该条件，认为结果太接近，nsimilar++，nsimilar&gt;1就认为有问题了，后面返回false</span></span><br><span class="line">    <span class="type">int</span> nsimilar = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span>(nGood1&gt;<span class="number">0.7</span>*maxGood)</span><br><span class="line">        nsimilar++;</span><br><span class="line">    <span class="keyword">if</span>(nGood2&gt;<span class="number">0.7</span>*maxGood)</span><br><span class="line">        nsimilar++;</span><br><span class="line">    <span class="keyword">if</span>(nGood3&gt;<span class="number">0.7</span>*maxGood)</span><br><span class="line">        nsimilar++;</span><br><span class="line">    <span class="keyword">if</span>(nGood4&gt;<span class="number">0.7</span>*maxGood)</span><br><span class="line">        nsimilar++;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 4.4 四个结果中如果没有明显的最优结果，或者没有足够数量的三角化点，则返回失败</span></span><br><span class="line">    <span class="comment">// 条件1: 如果四组解能够重建的最多3D点个数小于所要求的最少3D点个数（mMinGood），失败</span></span><br><span class="line">    <span class="comment">// 条件2: 如果存在两组及以上的解能三角化出 &gt;0.7*maxGood的点，说明没有明显最优结果，失败</span></span><br><span class="line">    <span class="keyword">if</span>(maxGood&lt;nMinGood || nsimilar&gt;<span class="number">1</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//  Step 4.5 选择最佳解记录结果</span></span><br><span class="line">    <span class="comment">// 条件1: 有效重建最多的3D点，即maxGood == nGoodx，也即是位于相机前方的3D点个数最多</span></span><br><span class="line">    <span class="comment">// 条件2: 三角化视差角 parallax 必须大于最小视差角 minParallax，角度越大3D点越稳定</span></span><br><span class="line">    <span class="comment">//看看最好的good点是在哪种解的条件下发生的</span></span><br><span class="line">    <span class="keyword">if</span>(maxGood==nGood1) &#123;</span><br><span class="line">		<span class="comment">//如果该种解下的parallax大于函数参数中给定的最小值</span></span><br><span class="line">        <span class="keyword">if</span>(parallax1&gt;minParallax) &#123;</span><br><span class="line">            vP3D = vP3D1;</span><br><span class="line">            vbTriangulated = vbTriangulated1;</span><br><span class="line">            R1.<span class="built_in">copyTo</span>(R21);</span><br><span class="line">            t1.<span class="built_in">copyTo</span>(t21);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(maxGood==nGood2)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(parallax2&gt;minParallax)</span><br><span class="line">        &#123;</span><br><span class="line">            vP3D = vP3D2;</span><br><span class="line">            vbTriangulated = vbTriangulated2;</span><br><span class="line"></span><br><span class="line">            R2.<span class="built_in">copyTo</span>(R21);</span><br><span class="line">            t1.<span class="built_in">copyTo</span>(t21);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(maxGood==nGood3)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(parallax3&gt;minParallax)</span><br><span class="line">        &#123;</span><br><span class="line">            vP3D = vP3D3;</span><br><span class="line">            vbTriangulated = vbTriangulated3;</span><br><span class="line"></span><br><span class="line">            R1.<span class="built_in">copyTo</span>(R21);</span><br><span class="line">            t2.<span class="built_in">copyTo</span>(t21);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(maxGood==nGood4)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(parallax4&gt;minParallax)</span><br><span class="line">        &#123;</span><br><span class="line">            vP3D = vP3D4;</span><br><span class="line">            vbTriangulated = vbTriangulated4;</span><br><span class="line"></span><br><span class="line">            R2.<span class="built_in">copyTo</span>(R21);</span><br><span class="line">            t2.<span class="built_in">copyTo</span>(t21);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果有最优解但是不满足对应的parallax&gt;minParallax，那么返回false表示求解失败</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-参考链接"><a href="#4-参考链接" class="headerlink" title="4. 参考链接"></a>4. 参考链接</h2><p>（1）<a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/document/7946260">ORB-SLAM2: An Open-Source SLAM System for Monocular, Stereo, and RGB-D Cameras</a></p>
+<p>（2） <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bK4y197kB/?spm_id_from=333.999.0.0&vd_source=d1710c631949e73d7f9132da564b19d4">5小时让你假装大概看懂ORB-SLAM2源码</a></p>
+<p>（3）<a target="_blank" rel="noopener" href="https://github.com/electech6/ORB_SLAM2_detailed_comments">https://github.com/electech6/ORB_SLAM2_detailed_comments</a></p>
+<p>（4）<a target="_blank" rel="noopener" href="https://github.com/raulmur/ORB_SLAM2">https://github.com/raulmur/ORB_SLAM2</a></p>
+<p>（5）计算机视觉之ORBSLAM2课程</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2022/04/10/%EF%BC%88%E5%9B%9B%EF%BC%89%E5%8D%95%E7%9B%AE%E5%88%9D%E5%A7%8B%E5%8C%96/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/14/%EF%BC%88%E4%BA%94%EF%BC%89%E5%9C%B0%E5%9B%BE%E7%82%B9MapPoint/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            （五）地图点MapPoint
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/08/%EF%BC%88%E4%B8%89%EF%BC%89%E5%B8%A7Frame/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">（三）帧Frame</div>
+      </a>
+    
+  </nav>
+
+  
+   
+<div class="gitalk" id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.css">
+
+
+<script src="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.js"></script>
+
+
+<script src="https://cdn.staticfile.org/blueimp-md5/2.19.0/js/md5.min.js"></script>
+
+<script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '',
+    clientSecret: '',
+    repo: '',
+    owner: '',
+    admin: [''],
+    // id: location.pathname,      // Ensure uniqueness and length less than 50
+    id: md5(location.pathname),
+    distractionFreeMode: false,  // Facebook-like distraction free mode
+    pagerDirection: 'last'
+  })
+
+  gitalk.render('gitalk-container')
+</script>
+
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021-2023
+        <i class="ri-heart-fill heart_icon"></i> thelll
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/kaqiu.png" alt="心向天空"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i></p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/MathJax.js"></script>
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/config/TeX-AMS-MML_HTMLorMML-full.js"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    <div id="music">
+    
+    
+    
+    <iframe frameborder="no" border="1" marginwidth="0" marginheight="0" width="200" height="52"
+        src="//music.163.com/outchain/player?type=2&id=109734&auto=1&height=32"></iframe>
+</div>
+
+<style>
+    #music {
+        position: fixed;
+        right: 15px;
+        bottom: 0;
+        z-index: 998;
+    }
+</style>
+    
+    
+
+  </div>
+</body>
+
+</html>

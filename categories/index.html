@@ -62,7 +62,7 @@
   
     <h1 class="page-type-title">Categories</h1>
     <div class="categories-box">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ORBSLAM2/">ORBSLAM2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/cmake/">cmake</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/">文献阅读</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%86%E8%A7%89SLAM/">视觉SLAM</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%86%E8%A7%89SLAM/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a><span class="category-list-count">2</span></li></ul></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ORBSLAM2/">ORBSLAM2</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/cmake/">cmake</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E5%AD%A6/">数学</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/">文献阅读</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%86%E8%A7%89SLAM/">视觉SLAM</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%86%E8%A7%89SLAM/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a><span class="category-list-count">2</span></li></ul></li></ul>
     </div>
   
 </section>
@@ -305,6 +305,30 @@
     viewer_init()
 </script> 
 <!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/MathJax.js"></script>
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/config/TeX-AMS-MML_HTMLorMML-full.js"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
 
 <!-- Katex -->
 

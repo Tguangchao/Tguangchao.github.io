@@ -135,7 +135,7 @@
 <p>​																       <img src="/../pictures/%E5%BE%AE%E5%88%9B%E9%AA%A8%E7%A7%91%E6%89%8B%E6%9C%AF%E7%9A%84%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E9%B2%81%E6%A3%92%E8%A7%86%E8%A7%89%E5%AE%9A%E4%BD%8D/2776-fig-3-source-large-16465733572153.gif" alt="img"></p>
 <p>​                                                                                                                   图二</p>
 <p><strong>我们利用扩展卡尔曼（ EKF） 公式来求解关节镜的定位作为机械臂运动命令 ( $$ U_K$$) 和视觉传感器观察 ($$ Z_k$$) 的函数</strong>。</p>
-<p><strong>运动模型</strong><br>$$<br>X_{k+1} &#x3D; f(X_k,U_k,V_k)<br>$$<br><strong>观测模型</strong><br>$$<br>Z_k &#x3D; h(X_k,W_k)<br>$$<br>其中 $$ U_K$$：机械臂运动函数；$$ Z_k$$ ：视觉传感器的观察函数；$$X_k$$：过滤器估计后的关节镜的位姿；   $$V_k$$：噪声（机械差异、反斜杠和关节执行器的精度）；$$W_k$$ ：噪声。</p>
+<p><strong>运动模型</strong><br>$$<br>X_{k+1} &#x3D; f(X_k,U_k,V_k)<br>$$<br><strong>观测模型</strong><br>$$<br>Z_k &#x3D; h(X_k,W_k)<br>$$<br>其中 $$U_K$$：机械臂运动函数；$$Z_k$$ ：视觉传感器的观察函数；$$X_k$$：过滤器估计后的关节镜的位姿；   $$V_k$$：噪声（机械差异、反斜杠和关节执行器的精度）；$$W_k$$ ：噪声。</p>
 <p><strong>其中将机器人的位姿存储为一个 7 元素的状态向量，旋转编码为四元数。</strong></p>
 <p><strong>传感器测量对应于使用尺度不变特征变换 (SIFT) 从灰度图像中提取的显着关键点</strong></p>
 <h3 id="四-替代融合策略"><a href="#四-替代融合策略" class="headerlink" title="四 替代融合策略"></a>四 替代融合策略</h3><p>本节介绍部分组合感知数据的替代策略。我们使用部分融合策略但非同时使用所有可用的传感器数据，其中参考图 见图3 以了解策略的简化描述。外部摄像头和关节镜姿势分别称为 $$Pext$$ 和 $$Part$$。相机中心之间的变换矩阵 T 是从校准中获得的，并假定为常数。</p>
@@ -240,11 +240,11 @@
    
   <nav class="article-nav">
     
-      <a href="/2023/04/05/LOAM_Livox_runing/" class="article-nav-link">
+      <a href="/2022/03/27/2022-03-27-%E7%BD%97%E5%BE%B7%E9%87%8C%E6%A0%BC%E6%96%AF%E5%85%AC%E5%BC%8F/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            LOAM-Livox运行
+            罗德里格斯公式
           
         </div>
       </a>
@@ -257,56 +257,34 @@
     
   </nav>
 
+  
    
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "",
-    app_key: "",
-    path: window.location.pathname,
-    avatar: "mp",
-    placeholder: "雁过留痕",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
+<div class="gitalk" id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.css">
+
+
+<script src="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.js"></script>
+
+
+<script src="https://cdn.staticfile.org/blueimp-md5/2.19.0/js/md5.min.js"></script>
+
+<script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '',
+    clientSecret: '',
+    repo: '',
+    owner: '',
+    admin: [''],
+    // id: location.pathname,      // Ensure uniqueness and length less than 50
+    id: md5(location.pathname),
+    distractionFreeMode: false,  // Facebook-like distraction free mode
+    pagerDirection: 'last'
+  })
+
+  gitalk.render('gitalk-container')
 </script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
 
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
-   
   
    
     <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
@@ -575,6 +553,30 @@
     viewer_init()
 </script> 
 <!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/MathJax.js"></script>
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/config/TeX-AMS-MML_HTMLorMML-full.js"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
 
 <!-- Katex -->
 

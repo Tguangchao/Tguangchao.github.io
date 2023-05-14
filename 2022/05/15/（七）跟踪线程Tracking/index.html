@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-Hans">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习，生活，娱乐" />
+       
+      <meta name="description" content="今天是一个值得记录的日子" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>（七）跟踪线程Tracking |  心向天空</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/logo.jpg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-（七）跟踪线程Tracking"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  （七）跟踪线程Tracking
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/15/%EF%BC%88%E4%B8%83%EF%BC%89%E8%B7%9F%E8%B8%AA%E7%BA%BF%E7%A8%8BTracking/" class="article-date">
+  <time datetime="2022-05-14T16:00:00.000Z" itemprop="datePublished">2022-05-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ORBSLAM2/">ORBSLAM2</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">7.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">29 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="（七）跟踪线程Tracking"><a href="#（七）跟踪线程Tracking" class="headerlink" title="（七）跟踪线程Tracking"></a>（七）跟踪线程Tracking</h1><h2 id="1-跟踪状态"><a href="#1-跟踪状态" class="headerlink" title="1.跟踪状态"></a>1.跟踪状态</h2><p><code>Tracking</code>类中定义枚举类型<code>eTrackingState</code>,用于表示跟踪状态,其可能的取值如下</p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SYSTEM_NOT_READY</code></td>
+<td>系统没有准备好,一般就是在启动后加载配置文件和词典文件时候的状态</td>
+</tr>
+<tr>
+<td><code>NO_IMAGES_YET</code></td>
+<td>还没有接收到输入图像</td>
+</tr>
+<tr>
+<td><code>NOT_INITIALIZED</code></td>
+<td>接收到图像但未初始化成功</td>
+</tr>
+<tr>
+<td><code>OK</code></td>
+<td>跟踪成功</td>
+</tr>
+<tr>
+<td><code>LOST</code></td>
+<td>跟踪失败</td>
+</tr>
+</tbody></table>
+<hr>
+<p><code>Tracking</code>类的成员变量<code>mState</code>和<code>mLastProcessedState</code>分别表示<strong>当前帧的跟踪状态</strong>和<strong>上一帧的跟踪状态</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>成员变量</th>
+<th>访问控制</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>eTrackingState mState</code></td>
+<td><code>public</code></td>
+<td>当前帧<code>mCurrentFrame</code>的跟踪状态</td>
+</tr>
+<tr>
+<td><code>eTrackingState mLastProcessedState</code></td>
+<td><code>public</code></td>
+<td>前一帧<code>mLastFrame</code>的跟踪状态</td>
+</tr>
+</tbody></table>
+<p>在前面已经介绍了单目的初始化，现在介绍初始位姿估计</p>
+<h2 id="2-位姿估计"><a href="#2-位姿估计" class="headerlink" title="2.  位姿估计"></a>2.  位姿估计</h2><p>当<code>Tracking</code>线程接收到一帧图像后,会先估计其初始位姿,再根据估计出的初始位姿跟踪局部地图并进一步优化位姿.</p>
+<p>初始位姿估计有三种手段:</p>
+<ul>
+<li>根据恒速运动模型估计位姿<code>TrackWithMotionModel()</code></li>
+<li>根据参考帧估计位姿<code>TrackReferenceKeyFrame()</code></li>
+<li>通过重定位估计位姿<code>Relocalization()</code></li>
+<li><img src="%EF%BC%88%E5%85%AB%EF%BC%89%E8%B7%9F%E8%B8%AA%E7%BA%BF%E7%A8%8BTracking.assets/image-20221116164329735.png" alt="image-20221116164329735" style="zoom:67%;" /></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Step 2：跟踪进入正常SLAM模式，有地图更新</span></span><br><span class="line"><span class="comment">// 是否正常跟踪</span></span><br><span class="line"><span class="keyword">if</span>(mState==OK)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Step 2.1 检查并更新上一帧被替换的MapPoints</span></span><br><span class="line">    <span class="comment">// 局部建图线程则可能会对原有的地图点进行替换.在这里进行检查</span></span><br><span class="line">    <span class="built_in">CheckReplacedInLastFrame</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2.2 运动模型是空的或刚完成重定位，跟踪参考关键帧；否则恒速模型跟踪</span></span><br><span class="line">    <span class="comment">// 第一个条件,如果运动模型为空,说明是刚初始化开始，或者已经跟丢了</span></span><br><span class="line">    <span class="comment">// 第二个条件,如果当前帧紧紧地跟着在重定位的帧的后面，我们将重定位帧来恢复位姿</span></span><br><span class="line">    <span class="comment">// mnLastRelocFrameId 上一次重定位的那一帧</span></span><br><span class="line">    <span class="keyword">if</span>(mVelocity.<span class="built_in">empty</span>() || mCurrentFrame.mnId&lt;mnLastRelocFrameId+<span class="number">2</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 用最近的关键帧来跟踪当前的普通帧</span></span><br><span class="line">        <span class="comment">// 通过BoW的方式在参考帧中找当前帧特征点的匹配点</span></span><br><span class="line">        <span class="comment">// 优化每个特征点都对应3D点重投影误差即可得到位姿</span></span><br><span class="line">        bOK = <span class="built_in">TrackReferenceKeyFrame</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 用最近的普通帧来跟踪当前的普通帧</span></span><br><span class="line">        <span class="comment">// 根据恒速模型设定当前帧的初始位姿</span></span><br><span class="line">        <span class="comment">// 通过投影的方式在参考帧中找当前帧特征点的匹配点</span></span><br><span class="line">        <span class="comment">// 优化每个特征点所对应3D点的投影误差即可得到位姿</span></span><br><span class="line">        bOK = <span class="built_in">TrackWithMotionModel</span>();</span><br><span class="line">        <span class="keyword">if</span>(!bOK)</span><br><span class="line">            <span class="comment">//根据恒速模型失败了，只能根据参考关键帧来跟踪</span></span><br><span class="line">            bOK = <span class="built_in">TrackReferenceKeyFrame</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 如果跟踪状态不成功,那么就只能重定位了 BOW搜索，EPnP求解位姿</span></span><br><span class="line">    bOK = <span class="built_in">Relocalization</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-参考帧估计位姿TrackReferenceKeyFrame"><a href="#2-1-参考帧估计位姿TrackReferenceKeyFrame" class="headerlink" title="2.1 参考帧估计位姿TrackReferenceKeyFrame()"></a>2.1 参考帧估计位姿<code>TrackReferenceKeyFrame()</code></h3><p>成员变量<code>mpReferenceKF</code>保存<code>Tracking</code>线程当前的参考关键帧,参考关键帧有两个来源:</p>
+<ol>
+<li>每当<code>Tracking</code>线程创建一个新的参考关键帧时,就将其设为参考关键帧.</li>
+<li>跟踪局部地图的函数<code>Tracking::TrackLocalMap()</code>内部会将与当前帧共视点最多的局部关键帧设为参考关键帧.</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Tracking::TrackReferenceKeyFrame</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step1. 根据当前帧描述子计算词袋</span></span><br><span class="line">    mCurrentFrame.<span class="built_in">ComputeBoW</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step2. 根据词袋寻找匹配</span></span><br><span class="line">    <span class="function">ORBmatcher <span class="title">matcher</span><span class="params">(<span class="number">0.7</span>, <span class="literal">true</span>)</span></span>;</span><br><span class="line">    vector&lt;MapPoint *&gt; vpMapPointMatches;</span><br><span class="line">    <span class="type">int</span> nmatches = matcher.<span class="built_in">SearchByBoW</span>(mpReferenceKF, mCurrentFrame, vpMapPointMatches);</span><br><span class="line">    <span class="keyword">if</span> (nmatches &lt; <span class="number">15</span>)  <span class="comment">// 词袋匹配过少则跟踪失败</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step3. 将上一帧位姿设为初始位姿估计值</span></span><br><span class="line">    mCurrentFrame.<span class="built_in">SetPose</span>(mLastFrame.mTcw); </span><br><span class="line">    mCurrentFrame.mvpMapPoints = vpMapPointMatches;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step4. 位姿BA: 只优化当前帧位姿</span></span><br><span class="line">    Optimizer::<span class="built_in">PoseOptimization</span>(&amp;mCurrentFrame);</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step5. 剔除外点</span></span><br><span class="line">    <span class="type">int</span> nmatchesMap = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; mCurrentFrame.N; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mCurrentFrame.mvpMapPoints[i]) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mCurrentFrame.mvbOutlier[i]) &#123;</span><br><span class="line">                MapPoint *pMP = mCurrentFrame.mvpMapPoints[i];</span><br><span class="line">                mCurrentFrame.mvpMapPoints[i] = <span class="built_in">static_cast</span>&lt;MapPoint *&gt;(<span class="literal">NULL</span>);</span><br><span class="line">                mCurrentFrame.mvbOutlier[i] = <span class="literal">false</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mCurrentFrame.mvpMapPoints[i]-&gt;<span class="built_in">Observations</span>() &gt; <span class="number">0</span>)</span><br><span class="line">                <span class="comment">//匹配的内点计数++</span></span><br><span class="line">                nmatchesMap++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step6. 匹配的地图点数超过10个就认为是跟踪成功</span></span><br><span class="line">    <span class="keyword">return</span> nmatchesMap &gt;= <span class="number">10</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="（1）应用场景"><a href="#（1）应用场景" class="headerlink" title="（1）应用场景:"></a>（1）应用场景:</h4><p><strong>没有速度信息的时候、刚完成重定位、或者恒速模型跟踪失败后使用,大部分时间不用</strong>，只利用到了参考帧的信息。</p>
+<ol>
+<li>匹配方法是 <code>SearchByBoW</code>,匹配当前帧和关键帧在同一节点下的特征点,不需要投影,速度很快</li>
+<li><code>BA</code>优化(仅优化位姿),提供比较粗糙的位姿</li>
+</ol>
+<h4 id="（2）思路"><a href="#（2）思路" class="headerlink" title="（2）思路:"></a>（2）思路:</h4><p>当使用运动模式匹配到的特征点数较少时,就会选用关键帧模式跟踪。思路是:尝试和最近一个关键帧去做匹配。为了快速匹配,利用了<code>bag of words(BoW</code>)来加速匹配</p>
+<h4 id="（3）具体代码实现流程"><a href="#（3）具体代码实现流程" class="headerlink" title="（3）具体代码实现流程"></a>（3）具体代码实现流程</h4><p>1 ）计算当前帧的<code>BoW</code>;</p>
+<p>2 ）通过特征点的<code>bow</code>加快当前帧和参考帧之间的特征点匹配。使用函数<code>matcher.SearchByBoW()</code>。</p>
+<ul>
+<li>​	对属于同一<code>node</code>(同一<code>node</code>才可能是匹配点)的特征点通过描述子距离进行匹配,遍历该<code>node</code>中特征点,特征点最小距离明显小于次小距离才作为成功匹配点,记录特征点对方向差统计到直方图；</li>
+<li>​	记录特征匹配成功后每个特征点对应的<code>MapPoint</code>(来自参考帧),用于后续<code>3D-2D</code>位姿优化</li>
+<li>​	通过角度投票进行剔除误匹配</li>
+</ul>
+<p>3） 将上一帧的位姿作为当前帧位姿的初始值(加速收敛),通过优化<code>3D-2D</code>的重投影误差来获得准确位姿。<code>3D-2D</code>来自第2步匹配成功的参考帧和当前帧,重投影</p>
+<ul>
+<li>误差 <code>e = (u,v) - project(Tcw*Pw)</code>,只优化位姿<code>Tcw</code>,不优化<code>MapPoints</code>的坐标。</li>
+<li>顶点： <code>Vertex: g2o::VertexSE3Expmap(),</code>初始值为上一帧的Tcw；</li>
+<li>边 <code>Edge</code>(单目)： <code>g2o::EdgeSE3ProjectXYZOnlyPose()</code>,一元边 <code>BaseUnaryEdge</code></li>
+<li>顶点 <code>Vertex</code>:待优化当前帧的<code>Tcw</code></li>
+<li>测量值 <code>measurement:MapPoint</code>在当前帧中的二维位置(u,v)</li>
+<li>误差信息矩阵 <code>InfoMatrix: Eigen::Matrix2d::Identity()*invSigma2</code>(与特征点所在的尺度有关)</li>
+<li>附加信息: 相机内参数: <code>e-&gt;fx fy cx cy</code></li>
+<li><code>3d</code>点坐标 : <code>e-&gt;Xw[0] Xw[1] Xw[2]</code> ，<code>2d</code>点对应的上一帧的<code>3d</code>点</li>
+<li>优化多次,根据边误差,更新<code>2d-3d</code>匹配质量内外点标记,当前帧设置优化后的位姿。</li>
+</ul>
+<p>4） 剔除优化后的<code>outlier</code>地图点</p>
+<ul>
+<li><code>lower_bound( begin,end,num)</code>：从数组的begin位置到end-1位置二分查找第一个大于或等于num的数字,找到返回该数字的地址,不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。</li>
+<li><code>upper_bound( begin,end,num)</code>：从数组的begin位置到end-1位置二分查找第一个大于num的数字,找到返回该数字的地址,不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。</li>
+</ul>
+<h3 id="2-2-恒速运动模型估计位姿TrackWithMotionModel"><a href="#2-2-恒速运动模型估计位姿TrackWithMotionModel" class="headerlink" title="2.2 恒速运动模型估计位姿TrackWithMotionModel()"></a>2.2 恒速运动模型估计位姿<code>TrackWithMotionModel()</code></h3><p>恒速运动模型假定连续几帧间的运动速度是恒定的;基于此假设,根据运动速度<code>mVelocity</code>和上一帧的位姿<code>mLastFrame.mTcw</code>计算出本帧位姿的估计值,再进行位姿优化.</p>
+<p>成员变量<code>mVelocity</code>保存前一帧的速度,主函数<code>Tracking::Track()</code>中调用完函数<code>Tracking::TrackLocalMap()</code>更新局部地图和当前帧位姿后,就计算速度并赋值给<code>mVelocity</code>.</p>
+<table>
+<thead>
+<tr>
+<th>成员函数&#x2F;变量</th>
+<th>访问控制</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TrackWithMotionModel()</code></td>
+<td><code>protected</code></td>
+<td>根据恒速运动模型估计初始位姿</td>
+</tr>
+<tr>
+<td><code>Frame mLastFrame</code></td>
+<td><code>protected</code></td>
+<td>前一帧,<code>TrackWithMotionModel()</code>与该帧匹配搜索关键点</td>
+</tr>
+<tr>
+<td><code>cv::Mat mVelocity</code></td>
+<td><code>protected</code></td>
+<td>相机前一帧运动速度,跟踪完局部地图后更新该成员变量</td>
+</tr>
+<tr>
+<td><code>list&lt;MapPoint*&gt; mlpTemporalPoints</code></td>
+<td><code>protected</code></td>
+<td>双目&#x2F;RGBD相机输入时,为前一帧生成的临时地图点 跟踪成功后该容器会被清空,其中的地图点会被删除</td>
+</tr>
+</tbody></table>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Tracking::TrackWithMotionModel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">ORBmatcher <span class="title">matcher</span><span class="params">(<span class="number">0.9</span>, <span class="literal">true</span>)</span></span>;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step1. 更新上一帧的位姿,对于双目/RGBD相机,还会生成临时地图点</span></span><br><span class="line">    <span class="built_in">UpdateLastFrame</span>();</span><br><span class="line">    <span class="comment">// step2. 根据运动模型设置初始位姿估计值</span></span><br><span class="line">    mCurrentFrame.<span class="built_in">SetPose</span>(mVelocity * mLastFrame.mTcw);</span><br><span class="line">    <span class="built_in">fill</span>(mCurrentFrame.mvpMapPoints.<span class="built_in">begin</span>(), mCurrentFrame.mvpMapPoints.<span class="built_in">end</span>(), <span class="built_in">static_cast</span>&lt;MapPoint *&gt;(<span class="literal">NULL</span>));</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step3. 根据初始位姿估计值进行投影匹配</span></span><br><span class="line">    <span class="type">int</span> th;</span><br><span class="line">    <span class="keyword">if</span> (mSensor != System::STEREO)</span><br><span class="line">        th = <span class="number">15</span>;<span class="comment">//单目</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        th = <span class="number">7</span>;<span class="comment">//双目</span></span><br><span class="line">    <span class="comment">// step3.1. 寻找匹配特征点</span></span><br><span class="line">    <span class="type">int</span> nmatches = matcher.<span class="built_in">SearchByProjection</span>(mCurrentFrame, mLastFrame, th, mSensor == System::MONOCULAR);</span><br><span class="line">    <span class="comment">// step3.2. 匹配特征点数目太少就放宽条件重新搜索匹配</span></span><br><span class="line">    <span class="keyword">if</span> (nmatches &lt; <span class="number">20</span>) &#123;    </span><br><span class="line">        <span class="built_in">fill</span>(mCurrentFrame.mvpMapPoints.<span class="built_in">begin</span>(), mCurrentFrame.mvpMapPoints.<span class="built_in">end</span>(), <span class="built_in">static_cast</span>&lt;MapPoint *&gt;(<span class="literal">NULL</span>));</span><br><span class="line">        nmatches = matcher.<span class="built_in">SearchByProjection</span>(mCurrentFrame, mLastFrame, <span class="number">2</span> * th, mSensor == System::MONOCULAR);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// step3.3. 实在找不到足够的匹配特征点,运动模型跟踪失败</span></span><br><span class="line">    <span class="keyword">if</span> (nmatches &lt; <span class="number">20</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step4. 位姿BA: 只优化当前帧位姿</span></span><br><span class="line">    Optimizer::<span class="built_in">PoseOptimization</span>(&amp;mCurrentFrame);</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step5. 剔除外点</span></span><br><span class="line">    <span class="type">int</span> nmatchesMap = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; mCurrentFrame.N; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mCurrentFrame.mvpMapPoints[i]) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mCurrentFrame.mvbOutlier[i]) &#123;</span><br><span class="line">                MapPoint *pMP = mCurrentFrame.mvpMapPoints[i];</span><br><span class="line">                mCurrentFrame.mvpMapPoints[i] = <span class="built_in">static_cast</span>&lt;MapPoint *&gt;(<span class="literal">NULL</span>);</span><br><span class="line">                mCurrentFrame.mvbOutlier[i] = <span class="literal">false</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mCurrentFrame.mvpMapPoints[i]-&gt;<span class="built_in">Observations</span>() &gt; <span class="number">0</span>)</span><br><span class="line">                nmatchesMap++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step6. 匹配的地图点数超过10个就认为是跟踪成功</span></span><br><span class="line">    <span class="keyword">return</span> nmatchesMap &gt;= <span class="number">10</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为保证位姿估计的准确性,对于双目&#x2F;<code>RGBD</code>相机,为前一帧生成临时地图点.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Tracking::UpdateLastFrame</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step1. 根据参考关键帧确定当前帧的位姿,使用关键帧是因为参考关键帧位姿更准确</span></span><br><span class="line">    KeyFrame *pRef = mLastFrame.mpReferenceKF;</span><br><span class="line">    cv::Mat Tlr = mlRelativeFramePoses.<span class="built_in">back</span>();</span><br><span class="line">    mLastFrame.<span class="built_in">SetPose</span>(Tlr * pRef-&gt;<span class="built_in">GetPose</span>());</span><br><span class="line">​</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step2. 对于双目/RGBD相机,生成新的临时地图点</span></span><br><span class="line">    <span class="keyword">if</span> (mnLastKeyFrameId == mLastFrame.mnId || mSensor == System::MONOCULAR)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    <span class="comment">// step2.1. 将上一帧种存在深度的特征点按深度从小到大排序</span></span><br><span class="line">    vector&lt;pair&lt;<span class="type">float</span>, <span class="type">int</span>&gt; &gt; vDepthIdx;</span><br><span class="line">    vDepthIdx.<span class="built_in">reserve</span>(mLastFrame.N);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; mLastFrame.N; i++) &#123;</span><br><span class="line">        <span class="type">float</span> z = mLastFrame.mvDepth[i];</span><br><span class="line">        <span class="keyword">if</span> (z &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            vDepthIdx.<span class="built_in">push_back</span>(<span class="built_in">make_pair</span>(z, i));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">sort</span>(vDepthIdx.<span class="built_in">begin</span>(), vDepthIdx.<span class="built_in">end</span>());</span><br><span class="line">    <span class="comment">// step2.2. 将上一帧中没三角化的特征点三角化出来,作为临时地图点</span></span><br><span class="line">    <span class="type">int</span> nPoints = <span class="number">0</span>;        <span class="comment">// 统计处理了多少特征点</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">size_t</span> j = <span class="number">0</span>; j &lt; vDepthIdx.<span class="built_in">size</span>(); j++) &#123;</span><br><span class="line">        <span class="type">int</span> i = vDepthIdx[j].second;</span><br><span class="line">        <span class="type">bool</span> bCreateNew = <span class="literal">false</span>;</span><br><span class="line">        MapPoint *pMP = mLastFrame.mvpMapPoints[i];</span><br><span class="line">        <span class="keyword">if</span> (!pMP || pMP-&gt;<span class="built_in">Observations</span>() &lt; <span class="number">1</span>) &#123;</span><br><span class="line">            bCreateNew = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// step2.3. 这些临时地图点在CreateNewKeyFrame之前会被删除,因此不用添加其他复杂属性</span></span><br><span class="line">        <span class="keyword">if</span> (bCreateNew) &#123;</span><br><span class="line">            cv::Mat x3D = mLastFrame.<span class="built_in">UnprojectStereo</span>(i);</span><br><span class="line">            MapPoint *pNewMP = <span class="keyword">new</span> <span class="built_in">MapPoint</span>(x3D, mpMap, &amp;mLastFrame, i);</span><br><span class="line">            mLastFrame.mvpMapPoints[i] = pNewMP;</span><br><span class="line">            mlpTemporalPoints.<span class="built_in">push_back</span>(pNewMP);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// step2.4. 临时地图点数目足够(多于100个)或者深度太大(深度越大位置越不准确),就停止生成临时地图点</span></span><br><span class="line">        <span class="keyword">if</span> (vDepthIdx[j].first &gt; mThDepth &amp;&amp; nPoints &gt; <span class="number">100</span>)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        nPoints++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="（1）应用场景-1"><a href="#（1）应用场景-1" class="headerlink" title="（1）应用场景"></a>（1）应用场景</h4><p>大部分时间都用这个跟踪,只利用到了上一帧的信息。</p>
+<ol>
+<li><p>用恒速模型先估计一个初始位姿</p>
+</li>
+<li><p>用该位姿进行投影匹配 SearchByProjection,候选点来自GetFeaturesInArea,未使用BoW</p>
+</li>
+<li><p>BA优化(仅优化位姿),提供比较粗糙的位姿</p>
+</li>
+</ol>
+<h4 id="（2）思想"><a href="#（2）思想" class="headerlink" title="（2）思想"></a>（2）思想</h4><p>假设短时间内(相邻帧)物体处于匀速运动状态,可以用上一帧的位姿和速度来估计当前帧的位姿。移动模式跟踪 跟踪前后两帧 得到 变换矩阵。</p>
+<p>上一帧的地图3d点反投影到当前帧图像像素坐标上,在不同尺度下不同的搜索半径内,做描述子匹配 搜索 可以加快匹配。</p>
+<p>在投影点附近根据描述子距离进行匹配(需要&gt;20对匹配,否则匀速模型跟踪失败,运动变化太大时会出现这种情况),然后以运动模型预测的位姿为初值,优化当前位姿,</p>
+<p>优化完成后再剔除外点,若剩余的匹配依然&gt;&#x3D;10对,则跟踪成功,否则跟踪失败,需要Relocalization</p>
+<h4 id="（3）具体流程"><a href="#（3）具体流程" class="headerlink" title="（3）具体流程"></a>（3）具体流程</h4><p>1:创建 ORB特征点匹配器 最小距离 &lt; 0.9次小距离 匹配成功</p>
+<p>2:更新上一帧的位姿和地图点</p>
+<p><strong>单目</strong>:只计算了上一帧世界坐标系位姿就退出了。Tlr<em>Trw &#x3D; Tlw</em></p>
+<p><strong>双目或rgbd相机</strong>:根据上一帧有效的深度值产生为上一帧生成新的临时地图点,之所以说是“临时”因为这些新加的地图点不加入到Map中,只是为了当前帧间跟踪更稳定,用完会删除,过河拆桥啊!</p>
+<p>3:使用当前的运动速度(之前前后两帧位姿变换)和上一帧的位姿来初始化 当前帧的位姿R,t</p>
+<p>4:在当前帧和上一帧之间搜索匹配点(matcher.SearchByProjection)</p>
+<ul>
+<li>通过投影(使用当前帧的位姿R,t),对上一帧的特征点(地图点)进行跟踪.</li>
+<li>上一帧3d点投影到当前坐标系下,在该2d点半径th范围内搜索可以匹配的匹配点,遍历可以匹配的点,计算描述子距离,记录最小的匹配距离,小于阈值的,再记录匹配点特征方向差值</li>
+<li>进行方向验证,剔除方向差直方图统计中,方向差值数量少的点对,保留前三个数量多的点对。</li>
+</ul>
+<p>5:如果找到的匹配点对如果少于20,则扩大搜索半径th&#x3D;2*th,使用SearchByProjection()再次进行搜索。</p>
+<p>6:使用匹配点对对当前帧的位姿进行优化 G2O图优化</p>
+<p>7:如果2d-3d匹配效果差,被标记为外点,则当前帧2d点对于的3d点设置为空,留着以后再优化</p>
+<p>8:根据内点的匹配数量,判断 跟踪上一帧是否成功</p>
+<h3 id="2-3-重定位估计位姿Relocalization"><a href="#2-3-重定位估计位姿Relocalization" class="headerlink" title="2.3 重定位估计位姿Relocalization()"></a>2.3 重定位估计位姿<code>Relocalization()</code></h3><p>当<code>TrackWithMotionModel()</code>和<code>TrackReferenceKeyFrame()</code>都失败后,就会调用函数<code>Relocalization()</code>通过重定位估计位姿.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1b</span><span class="function">ool <span class="title">Tracking::Relocalization</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// step1. 根据当前帧描述子计算词袋</span></span><br><span class="line">    mCurrentFrame.<span class="built_in">ComputeBoW</span>();</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step2. 根据词袋找到当前帧的候选参考关键帧</span></span><br><span class="line">    vector&lt;KeyFrame *&gt; vpCandidateKFs = mpKeyFrameDB-&gt;<span class="built_in">DetectRelocalizationCandidates</span>(&amp;mCurrentFrame);    </span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> nKFs = vpCandidateKFs.<span class="built_in">size</span>();</span><br><span class="line">    vector&lt;PnPsolver *&gt; vpPnPsolvers;</span><br><span class="line">    vpPnPsolvers.<span class="built_in">resize</span>(nKFs);</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step3. 遍历所有的候选参考关键帧,通过BOW进行快速匹配,用匹配结果初始化PnPsolver</span></span><br><span class="line">    vector&lt;vector&lt;MapPoint *&gt; &gt; vvpMapPointMatches;</span><br><span class="line">    vector&lt;<span class="type">bool</span>&gt; vbDiscarded;</span><br><span class="line">    <span class="function">ORBmatcher <span class="title">matcher</span><span class="params">(<span class="number">0.75</span>, <span class="literal">true</span>)</span></span>;</span><br><span class="line">    <span class="type">int</span> nCandidates = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nKFs; i++) &#123;</span><br><span class="line">        <span class="type">int</span> nmatches = matcher.<span class="built_in">SearchByBoW</span>(pKF, mCurrentFrame, vvpMapPointMatches[i]);</span><br><span class="line">        PnPsolver *pSolver = <span class="keyword">new</span> <span class="built_in">PnPsolver</span>(mCurrentFrame, vvpMapPointMatches[i]);</span><br><span class="line">        pSolver-&gt;<span class="built_in">SetRansacParameters</span>(<span class="number">0.99</span>, <span class="number">10</span>, <span class="number">300</span>, <span class="number">4</span>, <span class="number">0.5</span>, <span class="number">5.991</span>);</span><br><span class="line">        vpPnPsolvers[i] = pSolver;</span><br><span class="line">        nCandidates++;</span><br><span class="line">    &#125;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step4. 使用PnPsolver估计初始位姿,并根据初始位姿获取足够的匹配特征点</span></span><br><span class="line">    <span class="type">bool</span> bMatch = <span class="literal">false</span>;</span><br><span class="line">    <span class="function">ORBmatcher <span class="title">matcher2</span><span class="params">(<span class="number">0.9</span>, <span class="literal">true</span>)</span></span>;</span><br><span class="line">​</span><br><span class="line">    <span class="keyword">while</span> (nCandidates &gt; <span class="number">0</span> &amp;&amp; !bMatch) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nKFs; i++) &#123;</span><br><span class="line">            vector&lt;<span class="type">bool</span>&gt; vbInliers;</span><br><span class="line">            <span class="type">int</span> nInliers;</span><br><span class="line">            <span class="type">bool</span> bNoMore;</span><br><span class="line">            <span class="comment">// step4.1. 通过PnPsolver估计初始位姿</span></span><br><span class="line">            PnPsolver *pSolver = vpPnPsolvers[i];</span><br><span class="line">            cv::Mat Tcw = pSolver-&gt;<span class="built_in">iterate</span>(<span class="number">5</span>, bNoMore, vbInliers, nInliers);</span><br><span class="line">            <span class="keyword">if</span> (bNoMore) &#123;</span><br><span class="line">                vbDiscarded[i] = <span class="literal">true</span>;</span><br><span class="line">                nCandidates--;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// step4.2. 位姿BA: 只优化当前帧位姿</span></span><br><span class="line">            Tcw.<span class="built_in">copyTo</span>(mCurrentFrame.mTcw);</span><br><span class="line">            set&lt;MapPoint *&gt; sFound;</span><br><span class="line">            <span class="type">const</span> <span class="type">int</span> np = vbInliers.<span class="built_in">size</span>();</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; np; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (vbInliers[j]) &#123;</span><br><span class="line">                    mCurrentFrame.mvpMapPoints[j] = vvpMapPointMatches[i][j];</span><br><span class="line">                    sFound.<span class="built_in">insert</span>(vvpMapPointMatches[i][j]);</span><br><span class="line">                &#125; <span class="keyword">else</span></span><br><span class="line">                    mCurrentFrame.mvpMapPoints[j] = <span class="literal">NULL</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">int</span> nGood = Optimizer::<span class="built_in">PoseOptimization</span>(&amp;mCurrentFrame);</span><br><span class="line">​</span><br><span class="line">            <span class="comment">// step4.3. 剔除外点</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> io = <span class="number">0</span>; io &lt; mCurrentFrame.N; io++)</span><br><span class="line">                <span class="keyword">if</span> (mCurrentFrame.mvbOutlier[io])</span><br><span class="line">                    mCurrentFrame.mvpMapPoints[io] = <span class="built_in">static_cast</span>&lt;MapPoint *&gt;(<span class="literal">NULL</span>);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// step4.4. 若匹配特征点数目太少,则尝试第2次进行特征匹配+位姿优化</span></span><br><span class="line">            <span class="keyword">if</span> (nGood &lt; <span class="number">50</span>) &#123;</span><br><span class="line">                <span class="type">int</span> nadditional = matcher2.<span class="built_in">SearchByProjection</span>(mCurrentFrame, vpCandidateKFs[i], sFound, <span class="number">10</span>, <span class="number">100</span>);</span><br><span class="line">                <span class="keyword">if</span> (nadditional + nGood &gt;= <span class="number">50</span>) &#123;</span><br><span class="line">                    nGood = Optimizer::<span class="built_in">PoseOptimization</span>(&amp;mCurrentFrame);</span><br><span class="line">                    <span class="comment">// step4.5. 若匹配特征点数目太少,则尝试第3次进行特征匹配+位姿优化</span></span><br><span class="line">                    <span class="keyword">if</span> (nGood &gt; <span class="number">30</span> &amp;&amp; nGood &lt; <span class="number">50</span>) &#123;</span><br><span class="line">                        sFound.<span class="built_in">clear</span>();</span><br><span class="line">                        <span class="keyword">for</span> (<span class="type">int</span> ip = <span class="number">0</span>; ip &lt; mCurrentFrame.N; ip++)</span><br><span class="line">                            <span class="keyword">if</span> (mCurrentFrame.mvpMapPoints[ip])</span><br><span class="line">                                sFound.<span class="built_in">insert</span>(mCurrentFrame.mvpMapPoints[ip]);</span><br><span class="line">                        nadditional = matcher2.<span class="built_in">SearchByProjection</span>(mCurrentFrame, vpCandidateKFs[i], sFound, <span class="number">3</span>, <span class="number">64</span>);</span><br><span class="line">                        <span class="keyword">if</span> (nGood + nadditional &gt;= <span class="number">50</span>) &#123;</span><br><span class="line">                            nGood = Optimizer::<span class="built_in">PoseOptimization</span>(&amp;mCurrentFrame);</span><br><span class="line">                            <span class="keyword">for</span> (<span class="type">int</span> io = <span class="number">0</span>; io &lt; mCurrentFrame.N; io++)</span><br><span class="line">                                <span class="keyword">if</span> (mCurrentFrame.mvbOutlier[io])</span><br><span class="line">                                    mCurrentFrame.mvpMapPoints[io] = <span class="literal">NULL</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// step4.6. 若最后匹配数目终于足够了,则跟踪成功</span></span><br><span class="line">            <span class="keyword">if</span> (nGood &gt;= <span class="number">50</span>) &#123;</span><br><span class="line">                bMatch = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step5. 返回是否跟踪成功</span></span><br><span class="line">    <span class="keyword">if</span> (!bMatch) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        mnLastRelocFrameId = mCurrentFrame.mnId;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="（1）应用场景-2"><a href="#（1）应用场景-2" class="headerlink" title="（1）应用场景"></a>（1）应用场景</h4><p>跟踪丢失的时候使用,很少使用。利用到了相似候选帧的信息。</p>
+<ol>
+<li>用BoW先找到与该帧相似的候选关键帧(函数DetectRelocalizationCandidates)</li>
+<li>遍历候选关键帧,用SearchByBoW快速匹配,</li>
+<li>匹配点足够的情况下用EPnP 计算位姿并取出其中内点做BA优化(仅优化位姿),</li>
+<li>如果优化完内点较少,通过关键帧投影生成新的匹配(函数SearchByProjection),</li>
+<li>对匹配结果再做BA优化(仅优化位姿)。</li>
+</ol>
+<h4 id="（2）思想-1"><a href="#（2）思想-1" class="headerlink" title="（2）思想"></a>（2）思想</h4><p>当TrackWithMotionModel 和 TrackReferenceKeyFrame 都没有跟踪成功,位置丢失后,需要在之前的关键帧中匹配最相近的关键帧,进而求出位姿信息。</p>
+<p>使用当前帧的BoW特征映射,在关键帧数据库中寻找相似的候选关键帧,因为这里没有好的初始位姿信息,需要使用传统的3D-2D匹配点的EPnP算法来求解一个初始位姿,之后再使用最小化重投影误差来优化更新位姿。</p>
+<h4 id="（3）具体流程-1"><a href="#（3）具体流程-1" class="headerlink" title="（3）具体流程"></a>（3）具体流程</h4><p>1:计算当前帧的BoW向量和Feature向量</p>
+<p>2:在关键帧数据库中找到与当前帧相似的候选关键帧组</p>
+<p>3:创建 ORB特征点匹配器 最小距离 &lt; 0.75*次小距离 匹配成功。ORBmatcher matcher(0.75,true);</p>
+<p>4:遍历每一个候选关键帧使用BOW特征向量加速匹配,匹配太少的去掉,选择符合要求的候选关键帧用其地图点为其创建pnp优化器</p>
+<p>5:使用PnPsolver 位姿变换求解器,增加3d-2d匹配点</p>
+<p>6点直接线性变换DLT,后使用QR分解得到 R,t, 或者使用(P3P),3点平面匹配算法求解。</p>
+<ul>
+<li>这里会结合 Ransac 随采样序列一致性算法,来提高求解的鲁棒性。</li>
+<li>6:EPnP算法迭代估计姿态作为当前帧的初始位姿,使用最小化重投影误差BA算法来优化位姿</li>
+</ul>
+<p>7:如果优化时记录的匹配点对内点数量少于50,想办法再增加匹配点数量:通过投影的方式对之前未匹配的点进行3D-2D匹配,又给了一次重新做人的机会</p>
+<p>8: 如果新增的数量加上之前的匹配点数量 大于50,再次使用 位姿优化算法进行优化</p>
+<p>9:如果上面优化后的内点数量还比较少,还想挽留一下,就缩小搜索窗口重新投影匹配(比之前使用更多的地图点了),如果最后匹配次数大于50,就认为是可以勉强扶起来的阿斗,再给BA位优化一次。否则,放弃了(真的已经仁至义尽了!)</p>
+<p>10:如果经过上面一系列的挽救操作,内点数量 大于等于50 ,则重定位成功。</p>
+<h2 id="3-跟踪局部地图-TrackLocalMap"><a href="#3-跟踪局部地图-TrackLocalMap" class="headerlink" title="3. 跟踪局部地图: TrackLocalMap()"></a>3. 跟踪局部地图: <code>TrackLocalMap()</code></h2><table>
+<thead>
+<tr>
+<th>成员函数&#x2F;变量</th>
+<th>访问控制</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bool TrackLocalMap()</code></td>
+<td><code>protected</code></td>
+<td>更新局部地图并优化当前帧位姿</td>
+</tr>
+<tr>
+<td><code>void UpdateLocalMap()</code></td>
+<td><code>protected</code></td>
+<td>更新局部地图</td>
+</tr>
+<tr>
+<td><code>std::vector&lt;KeyFrame*&gt; mvpLocalKeyFrames</code></td>
+<td><code>protected</code></td>
+<td>局部关键帧列表</td>
+</tr>
+<tr>
+<td><code>std::vector&lt;MapPoint*&gt; mvpLocalMapPoints</code></td>
+<td><code>protected</code></td>
+<td>局部地图点列表</td>
+</tr>
+<tr>
+<td><code>void SearchLocalPoints()</code></td>
+<td><code>protected</code></td>
+<td>将局部地图点投影到当前帧特征点上</td>
+</tr>
+</tbody></table>
+<p><img src="/%EF%BC%88%E5%85%AB%EF%BC%89%E8%B7%9F%E8%B8%AA%E7%BA%BF%E7%A8%8BTracking.assets/20210514104933238-16687398127384.png" alt="请添加图片描述"></p>
+<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景:"></a>应用场景:</h4><p>前面3种跟踪方式得到当前帧地图点后的后处理,每次跟踪都使用。成功估计当前帧的初始位姿后,基于当前位姿更新局部地图并优化当前帧位姿,利用到了当前帧的两级共视关键帧的信息,使得位姿更加准确。</p>
+<h4 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤:"></a>具体步骤:</h4><p>1） 更新局部地图,包括局部关键帧列表<code>mvpLocalKeyFrames</code>和局部地图点列表<code>mvpLocalMapPoints</code>.</p>
+<ul>
+<li>首先根据前面得到的当前帧的地图点来找能观测到当前帧的一级共视关键帧,将这些一级共视关键帧的二级关键共视帧、子关键帧、父关键帧一起作为局部关键帧;</li>
+<li>取出上述局部关键帧中所有的地图点作为局部地图点;</li>
+</ul>
+<p>2）将局部地图点投影到当前帧,去掉不在视野内的无效的地图点,剩下的局部地图点投影到当前帧进行匹配(函数SearchByProjection)<br>对匹配结果再做BA优化(仅优化位姿)</p>
+<p>3）更新地图点观测数值,统计内点个数.</p>
+<p>4）这里的地图点观测数值会被用作<code>LocalMapping</code>线程中<code>LocalMapping::MapPointCulling()</code>函数剔除坏点的标准之一.</p>
+<p>5）根据内点数判断是否跟踪成功.</p>
+<p><strong>当前帧</strong>:mCurrentFrame(当前帧是普通帧)</p>
+<p><strong>参考关键帧</strong>: 与当前帧共视程度最高的关键帧作为参考关键帧,mCurrentFrame.mpReferenceKF</p>
+<p>在KeyFrame::UpdateConnections() 里确定关键帧的父子关系(当前帧必须是关键帧)</p>
+<p><strong>父关键帧</strong>:和当前关键帧共视程度最高的关键帧</p>
+<p><strong>子关键帧</strong>:是上述父关键帧的子关键帧</p>
+<p><img src="/%EF%BC%88%E5%85%AB%EF%BC%89%E8%B7%9F%E8%B8%AA%E7%BA%BF%E7%A8%8BTracking.assets/image-20221118105038174.png" alt="image-20221118105038174"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Tracking::TrackLocalMap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step1. 更新局部地图,包括局部关键帧mvpLocalKeyFrames和局部地图点mvpLocalMapPoints</span></span><br><span class="line">    <span class="built_in">UpdateLocalMap</span>();</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step2. 将局部地图点投影到当前帧特征点上</span></span><br><span class="line">    <span class="built_in">SearchLocalPoints</span>();</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step3. 位姿BA: 只优化当前帧位姿</span></span><br><span class="line">    Optimizer::<span class="built_in">PoseOptimization</span>(&amp;mCurrentFrame);</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step4. 更新地图点观测,统计内点个数</span></span><br><span class="line">    <span class="comment">// 这里的地图点观测数值会被用作LocalMapping线程中MapPointCulling()函数剔除坏点的标准之一</span></span><br><span class="line">    mnMatchesInliers = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; mCurrentFrame.N; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mCurrentFrame.mvpMapPoints[i]) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!mCurrentFrame.mvbOutlier[i]) &#123;</span><br><span class="line">                mCurrentFrame.mvpMapPoints[i]-&gt;<span class="built_in">IncreaseFound</span>(); <span class="comment">// 位姿估计用到该地图点</span></span><br><span class="line">                <span class="keyword">if</span> (mCurrentFrame.mvpMapPoints[i]-&gt;<span class="built_in">Observations</span>() &gt; <span class="number">0</span>)</span><br><span class="line">                    mnMatchesInliers++;                         </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step5. 判断是否跟踪成功: 若刚发生过重定位,则标准严苛一点,否则标准宽松一点.(防止误闭环)</span></span><br><span class="line">    <span class="keyword">if</span> (mCurrentFrame.mnId &lt; mnLastRelocFrameId + mMaxFrames &amp;&amp; mnMatchesInliers &lt; <span class="number">50</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (mnMatchesInliers &lt; <span class="number">30</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>函数<code>Tracking::UpdateLocalMap()</code>依次调用函数<code>Tracking::UpdateLocalKeyFrames()</code>更新局部关键帧列表<code>mvpLocalKeyFrames</code>和函数<code>Tracking::UpdateLocalPoints()</code>更新局部地图点列表<code>mvpLocalMapPoints</code>.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Tracking::UpdateLocalMap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">UpdateLocalKeyFrames</span>();         <span class="comment">// 更新局部关键帧列表mvpLocalKeyFrames</span></span><br><span class="line">    <span class="built_in">UpdateLocalPoints</span>();            <span class="comment">// 更新局部地图点列表mvpLocalMapPoints</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数<code>Tracking::UpdateLocalKeyFrames()</code>内,局部关键帧列表<code>mvpLocalKeyFrames</code>会被清空并重新赋值,包括以下3部分:</p>
+<ol>
+<li>当前地图点的所有共视关键帧.</li>
+<li><code>1</code>中所有关键帧的父子关键帧.</li>
+<li><code>1</code>中所有关键帧共视关系前<code>10</code>大的共视关键帧.</li>
+</ol>
+<p>更新完局部关键帧列表<code>mvpLocalKeyFrames</code>后,还将与当前帧共视关系最强的关键帧设为参考关键帧<code>mpReferenceKF</code>.</p>
+<p>函数<code>Tracking::UpdateLocalPoints()</code>内,局部地图点列表<code>mvpLocalMapPoints</code>会被清空并赋值为局部关键帧列表<code>mvpLocalKeyFrames</code>的所有地图点.</p>
+<p>函数<code>Tracking::SearchLocalPoints()</code>将局部地图点投影到当前帧特征点上</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Tracking::SearchLocalPoints</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// step1. 当前帧地图点已经匹配了特征点</span></span><br><span class="line">    <span class="keyword">for</span> (MapPoint *pMP: mCurrentFrame.mvpMapPoints) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pMP) &#123;</span><br><span class="line">            <span class="keyword">if</span> (pMP-&gt;<span class="built_in">isBad</span>()) &#123;</span><br><span class="line">                *vit = <span class="built_in">static_cast</span>&lt;MapPoint *&gt;(<span class="literal">NULL</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                pMP-&gt;<span class="built_in">IncreaseVisible</span>();</span><br><span class="line">                pMP-&gt;mnLastFrameSeen = mCurrentFrame.mnId;</span><br><span class="line">                pMP-&gt;mbTrackInView = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// step2. 统计视野内地图点数目 </span></span><br><span class="line">    <span class="type">int</span> nToMatch = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (MapPoint *pMP: mvpLocalMapPoints) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pMP-&gt;mnLastFrameSeen == mCurrentFrame.mnId)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">if</span> (pMP-&gt;<span class="built_in">isBad</span>())</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">​</span><br><span class="line">        <span class="keyword">if</span> (mCurrentFrame.<span class="built_in">isInFrustum</span>(pMP, <span class="number">0.5</span>)) &#123;</span><br><span class="line">            pMP-&gt;<span class="built_in">IncreaseVisible</span>();</span><br><span class="line">            nToMatch++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// Step 3：如果需要进行投影匹配的点的数目大于0，就进行投影匹配</span></span><br><span class="line">    <span class="keyword">if</span> (nToMatch &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="function">ORBmatcher <span class="title">matcher</span><span class="params">(<span class="number">0.8</span>)</span></span>;</span><br><span class="line">        <span class="type">int</span> th = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (mSensor == System::RGBD) </span><br><span class="line">            th = <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">if</span> (mCurrentFrame.mnId &lt; mnLastRelocFrameId + <span class="number">2</span>)</span><br><span class="line">            th = <span class="number">5</span>;</span><br><span class="line">        matcher.<span class="built_in">SearchByProjection</span>(mCurrentFrame, mvpLocalMapPoints, th);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-关键帧的创建"><a href="#4-关键帧的创建" class="headerlink" title="4.关键帧的创建"></a>4.关键帧的创建</h2><p><img src="/%EF%BC%88%E5%85%AB%EF%BC%89%E8%B7%9F%E8%B8%AA%E7%BA%BF%E7%A8%8BTracking.assets/20210514104933217.png" alt="请添加图片描述"></p>
+<h3 id="4-1-判断是否需要创建新关键帧-NeedNewKeyFrame"><a href="#4-1-判断是否需要创建新关键帧-NeedNewKeyFrame" class="headerlink" title="4.1 判断是否需要创建新关键帧: NeedNewKeyFrame()"></a>4.1 判断是否需要创建新关键帧: <code>NeedNewKeyFrame()</code></h3><p>是否生成关键帧,需要考虑以下几个方面:</p>
+<ol>
+<li>最近是否进行过重定位,重定位后位姿不会太准,不适合做参考帧.</li>
+<li>当前系统的工作状态: 如果<code>LocalMapping</code>线程还有很多<code>KeyFrame</code>没处理的话,不适合再给它增加负担了.</li>
+<li>距离上次创建关键帧经过的时间: 如果很长时间没创建关键帧了的话,就要抓紧创建关键帧了.</li>
+<li>当前帧的质量: 当前帧观测到的地图点要足够多,同时与参考关键帧的重合程度不能太大.</li>
+</ol>
+<p>具体的代码比较乱;不看了.</p>
+<p>总体而言,ORB-SLAM2插入关键帧的策略还是比较宽松的,因为后面<code>LocalMapping</code>线程的函数<code>LocalMapping::KeyFrameCulling()</code>会剔除冗余关键帧,因此在系统处理得过来的情况下,要尽量多创建关键帧.</p>
+<h3 id="4-2-创建新关键帧-CreateNewKeyFrame"><a href="#4-2-创建新关键帧-CreateNewKeyFrame" class="headerlink" title="4.2 创建新关键帧: CreateNewKeyFrame()"></a>4.2 创建新关键帧: <code>CreateNewKeyFrame()</code></h3><p>创建新关键帧时,对于双目&#x2F;RGBD相机输入情况下也创建新地图点.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Tracking::CreateNewKeyFrame</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// step1. 构造关键帧</span></span><br><span class="line">    KeyFrame *pKF = <span class="keyword">new</span> <span class="built_in">KeyFrame</span>(mCurrentFrame, mpMap, mpKeyFrameDB);</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step2. 将创建出的关键帧设为参考关键帧</span></span><br><span class="line">    mpReferenceKF = pKF;</span><br><span class="line">    mCurrentFrame.mpReferenceKF = pKF;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step3. 对于双目/RGBD相机生成新的地图点</span></span><br><span class="line">    <span class="keyword">if</span> (mSensor != System::MONOCULAR) &#123;</span><br><span class="line">        mCurrentFrame.<span class="built_in">UpdatePoseMatrices</span>();</span><br><span class="line">​</span><br><span class="line">        <span class="comment">// step3.1. 按深度从小到大排序关键点</span></span><br><span class="line">        vector&lt;pair&lt;<span class="type">float</span>, <span class="type">int</span>&gt; &gt; vDepthIdx;</span><br><span class="line">        vDepthIdx.<span class="built_in">reserve</span>(mCurrentFrame.N);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; mCurrentFrame.N; i++) &#123;</span><br><span class="line">            <span class="type">float</span> z = mCurrentFrame.mvDepth[i];</span><br><span class="line">            <span class="keyword">if</span> (z &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                vDepthIdx.<span class="built_in">push_back</span>(<span class="built_in">make_pair</span>(z, i));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (!vDepthIdx.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">            <span class="built_in">sort</span>(vDepthIdx.<span class="built_in">begin</span>(), vDepthIdx.<span class="built_in">end</span>());</span><br><span class="line">            <span class="comment">// step3.2. 找出没对应地图点的特征点,并创建新地图点</span></span><br><span class="line">            <span class="type">int</span> nPoints = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">size_t</span> j = <span class="number">0</span>; j &lt; vDepthIdx.<span class="built_in">size</span>(); j++) &#123;</span><br><span class="line">                <span class="type">int</span> i = vDepthIdx[j].second;</span><br><span class="line">                <span class="type">bool</span> bCreateNew = <span class="literal">false</span>;</span><br><span class="line">                MapPoint *pMP = mCurrentFrame.mvpMapPoints[i];</span><br><span class="line">                <span class="keyword">if</span> (!pMP)</span><br><span class="line">                    bCreateNew = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (pMP-&gt;<span class="built_in">Observations</span>() &lt; <span class="number">1</span>) &#123;</span><br><span class="line">                    bCreateNew = <span class="literal">true</span>;</span><br><span class="line">                    mCurrentFrame.mvpMapPoints[i] = <span class="built_in">static_cast</span>&lt;MapPoint *&gt;(<span class="literal">NULL</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (bCreateNew) &#123;</span><br><span class="line">                    cv::Mat x3D = mCurrentFrame.<span class="built_in">UnprojectStereo</span>(i);</span><br><span class="line">                    MapPoint *pNewMP = <span class="keyword">new</span> <span class="built_in">MapPoint</span>(x3D, pKF, mpMap);</span><br><span class="line">                    pNewMP-&gt;<span class="built_in">AddObservation</span>(pKF, i);</span><br><span class="line">                    pKF-&gt;<span class="built_in">AddMapPoint</span>(pNewMP, i);</span><br><span class="line">                    pNewMP-&gt;<span class="built_in">ComputeDistinctiveDescriptors</span>();</span><br><span class="line">                    pNewMP-&gt;<span class="built_in">UpdateNormalAndDepth</span>();</span><br><span class="line">                    mpMap-&gt;<span class="built_in">AddMapPoint</span>(pNewMP);</span><br><span class="line">                    mCurrentFrame.mvpMapPoints[i] = pNewMP;</span><br><span class="line">                &#125;</span><br><span class="line">                nPoints++;    </span><br><span class="line">                <span class="comment">// step3.3. 地图点过多(多于100个)或深度太深(误差太大),则停止生成地图点</span></span><br><span class="line">                <span class="keyword">if</span> (vDepthIdx[j].first &gt; mThDepth &amp;&amp; nPoints &gt; <span class="number">100</span>)</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// step4. 插入关键帧</span></span><br><span class="line">    mpLocalMapper-&gt;<span class="built_in">InsertKeyFrame</span>(pKF);</span><br><span class="line">    mpLocalMapper-&gt;<span class="built_in">SetNotStop</span>(<span class="literal">false</span>);</span><br><span class="line">    mnLastKeyFrameId = mCurrentFrame.mnId;</span><br><span class="line">    mpLastKeyFrame = pKF;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-Tracking流程中的关键问题-暗线"><a href="#5-Tracking流程中的关键问题-暗线" class="headerlink" title="5.Tracking流程中的关键问题(暗线)"></a>5.<code>Tracking</code>流程中的关键问题(暗线)</h2><h3 id="5-1-地图点的创建与删除"><a href="#5-1-地图点的创建与删除" class="headerlink" title="5.1 地图点的创建与删除"></a>5.1 地图点的创建与删除</h3><ol>
+<li><code>Tracking</code>线程中初始化过程(<code>Tracking::MonocularInitialization()</code>和<code>Tracking::StereoInitialization()</code>)会创建新的地图点.</li>
+<li><code>Tracking</code>线程中创建新的关键帧(<code>Tracking::CreateNewKeyFrame()</code>)会创建新的地图点.</li>
+<li><code>Tracking</code>线程中根据恒速运动模型估计初始位姿(<code>Tracking::TrackWithMotionModel()</code>)也会产生临时地图点,但这些临时地图点在跟踪成功后会被马上删除.</li>
+</ol>
+<p>所有的非临时地图点都是由关键帧建立的,<code>Tracking::TrackWithMotionModel()</code>中由非关键帧建立的关键点被设为临时关键点,很快会被删掉,仅作增强帧间匹配用,不会对建图产生任何影响.这也不违反<strong>只有关键帧才能参与<code>LocalMapping</code>和<code>LoppClosing</code>线程</strong>的原则.</p>
+<blockquote>
+<p>思考: 为什么跟踪失败的话不删除这些局部地图点</p>
+<p>跟踪失败的话不会产生关键帧,这些地图点也不会被注册进地图,不会对之后的建图产生影响.</p>
+<p>思考: 那会不会发生内存泄漏呢?</p>
+<p>不会的,因为最后总会有一帧跟踪上,这些临时地图点都被保存在了成员变量<code>mlpTemporalPoints</code>中,跟踪成功后会删除所有之前的临时地图点.</p>
+</blockquote>
+<h3 id="5-2-关键帧与地图点间发生关系的时机"><a href="#5-2-关键帧与地图点间发生关系的时机" class="headerlink" title="5.2 关键帧与地图点间发生关系的时机"></a>5.2 关键帧与地图点间发生关系的时机</h3><ul>
+<li>新创建出来的非临时地图点都会与创建它的关键帧建立双向连接.</li>
+<li>通过<code>ORBmatcher::SearchByXXX()</code>函数匹配得到的帧点关系只建立单向连接:<ul>
+<li>只在关键帧中添加了对地图点的观测(将地图点加入到关键帧对象的成员变量<code>mvpMapPoints</code>中了).</li>
+<li>没有在地图点中添加对关键帧的观测(地图点的成员变量<code>mObservations</code>中没有该关键帧).</li>
+</ul>
+</li>
+</ul>
+<p>这为后文中<code>LocalMapping</code>线程中函数<code>LocalMapping::ProcessNewKeyFrame()</code>对关键帧中地图点的处理埋下了伏笔.该函数通过检查地图点中是否有对关键点的观测来判断该地图点是否是新生成的.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LocalMapping::ProcessNewKeyFrame</span><span class="params">()</span> </span>&#123;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// 遍历关键帧中的地图点</span></span><br><span class="line">    <span class="type">const</span> vector&lt;MapPoint *&gt; vpMapPointMatches = mpCurrentKeyFrame-&gt;<span class="built_in">GetMapPointMatches</span>();</span><br><span class="line">    <span class="keyword">for</span> (MapPoint *pMP : vpMapPointMatches) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!pMP-&gt;<span class="built_in">IsInKeyFrame</span>(mpCurrentKeyFrame)) &#123;</span><br><span class="line">            <span class="comment">// step3.1. 该地图点是跟踪本关键帧时匹配得到的,在地图点中加入对当前关键帧的观测</span></span><br><span class="line">            pMP-&gt;<span class="built_in">AddObservation</span>(mpCurrentKeyFrame, i);</span><br><span class="line">            pMP-&gt;<span class="built_in">UpdateNormalAndDepth</span>();</span><br><span class="line">            pMP-&gt;<span class="built_in">ComputeDistinctiveDescriptors</span>();</span><br><span class="line">        &#125; <span class="keyword">else</span> </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// step3.2. 该地图点是跟踪本关键帧时新生成的,将其加入容器mlpRecentAddedMapPoints待筛选</span></span><br><span class="line">            mlpRecentAddedMapPoints.<span class="built_in">push_back</span>(pMP);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">​</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-参考关键帧-mpReferenceKF"><a href="#5-3-参考关键帧-mpReferenceKF" class="headerlink" title="5.3 参考关键帧: mpReferenceKF"></a>5.3 参考关键帧: <code>mpReferenceKF</code></h3><ul>
+<li>参考关键帧的用途:<ol>
+<li><code>Tracking</code>线程中函数<code>Tracking::TrackReferenceKeyFrame()</code>根据参考关键帧估计初始位姿.</li>
+<li>用于初始化新创建的<code>MapPoint</code>的参考帧<code>mpRefKF</code>,函数<code>MapPoint::UpdateNormalAndDepth()</code>中根据参考关键帧<code>mpRefKF</code>更新地图点的平均观测距离.</li>
+</ol>
+</li>
+<li>参考关键帧的指定:<ol>
+<li><code>Traking</code>线程中函数<code>Tracking::CreateNewKeyFrame()</code>创建完新关键帧后,会将新创建的关键帧设为参考关键帧.</li>
+<li><code>Tracking</code>线程中函数<code>Tracking::TrackLocalMap()</code>跟踪局部地图过程中调用函数<code>Tracking::UpdateLocalMap()</code>,其中调用函数<code>Tracking::UpdateLocalKeyFrames()</code>,将与当前帧共视程度最高的关键帧设为参考关键帧.</li>
+</ol>
+</li>
+</ul>
+<h2 id="6-参考链接"><a href="#6-参考链接" class="headerlink" title="6. 参考链接"></a>6. 参考链接</h2><p>（1）<a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/document/7946260">ORB-SLAM2: An Open-Source SLAM System for Monocular, Stereo, and RGB-D Cameras</a></p>
+<p>（2） <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bK4y197kB/?spm_id_from=333.999.0.0&vd_source=d1710c631949e73d7f9132da564b19d4">5小时让你假装大概看懂ORB-SLAM2源码</a></p>
+<p>（3）<a target="_blank" rel="noopener" href="https://github.com/electech6/ORB_SLAM2_detailed_comments">https://github.com/electech6/ORB_SLAM2_detailed_comments</a></p>
+<p>（4）<a target="_blank" rel="noopener" href="https://github.com/raulmur/ORB_SLAM2">https://github.com/raulmur/ORB_SLAM2</a></p>
+<p>（5）计算机视觉之ORBSLAM2课程</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2022/05/15/%EF%BC%88%E4%B8%83%EF%BC%89%E8%B7%9F%E8%B8%AA%E7%BA%BF%E7%A8%8BTracking/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/30/2022-05-30-LOAM_Livox_runing/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            LOAM-Livox运行
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/28/%EF%BC%88%E5%85%AD%EF%BC%89%E5%85%B3%E9%94%AE%E5%B8%A7KeyFrame/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">（六）关键帧KeyFrame</div>
+      </a>
+    
+  </nav>
+
+  
+   
+<div class="gitalk" id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.css">
+
+
+<script src="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.js"></script>
+
+
+<script src="https://cdn.staticfile.org/blueimp-md5/2.19.0/js/md5.min.js"></script>
+
+<script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '',
+    clientSecret: '',
+    repo: '',
+    owner: '',
+    admin: [''],
+    // id: location.pathname,      // Ensure uniqueness and length less than 50
+    id: md5(location.pathname),
+    distractionFreeMode: false,  // Facebook-like distraction free mode
+    pagerDirection: 'last'
+  })
+
+  gitalk.render('gitalk-container')
+</script>
+
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021-2023
+        <i class="ri-heart-fill heart_icon"></i> thelll
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/kaqiu.png" alt="心向天空"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i></p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/MathJax.js"></script>
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/config/TeX-AMS-MML_HTMLorMML-full.js"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    <div id="music">
+    
+    
+    
+    <iframe frameborder="no" border="1" marginwidth="0" marginheight="0" width="200" height="52"
+        src="//music.163.com/outchain/player?type=2&id=109734&auto=1&height=32"></iframe>
+</div>
+
+<style>
+    #music {
+        position: fixed;
+        right: 15px;
+        bottom: 0;
+        z-index: 998;
+    }
+</style>
+    
+    
+
+  </div>
+</body>
+
+</html>

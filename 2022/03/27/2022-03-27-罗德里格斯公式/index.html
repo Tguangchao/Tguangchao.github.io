@@ -15,7 +15,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>LOAM-Livox运行 |  心向天空</title>
+      <title>罗德里格斯公式 |  心向天空</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/images/logo.jpg" />
@@ -60,7 +60,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-LOAM_Livox_runing"
+  id="post-2022-03-27-罗德里格斯公式"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -71,7 +71,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  LOAM-Livox运行
+  罗德里格斯公式
 </h1>
  
 
@@ -79,11 +79,11 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2023/04/05/LOAM_Livox_runing/" class="article-date">
-  <time datetime="2023-04-04T16:00:00.000Z" itemprop="datePublished">2023-04-05</time>
+      <a href="/2022/03/27/2022-03-27-%E7%BD%97%E5%BE%B7%E9%87%8C%E6%A0%BC%E6%96%AF%E5%85%AC%E5%BC%8F/" class="article-date">
+  <time datetime="2022-03-26T16:00:00.000Z" itemprop="datePublished">2022-03-27</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%BF%80%E5%85%89SLAM/">激光SLAM</a>
+    <a class="article-category-link" href="/categories/%E6%95%B0%E5%AD%A6/">数学</a>
   </div>
   
 <div class="word_count">
@@ -91,7 +91,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">264</span>
+            <span class="post-count">762</span>
         </span>
     </span>
 
@@ -100,7 +100,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">1 min</span>
+            <span class="post-count">3 min</span>
         </span>
     </span>
 </div>
@@ -115,25 +115,35 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="LOAM-Livox"><a href="#LOAM-Livox" class="headerlink" title="LOAM-Livox"></a>LOAM-Livox</h1><span id="more"></span>
+  <h1 id="罗德里格斯公式"><a href="#罗德里格斯公式" class="headerlink" title="罗德里格斯公式"></a>罗德里格斯公式</h1><span id="more"></span>
 
-<p><strong>Loam-Livox是用于</strong><a target="_blank" rel="noopener" href="https://www.livoxtech.com/"><em>Livox 激光</em></a>雷达的稳健、低漂移和实时里程计和测绘软件包，是专为大规模工业用途而设计的低成本和高性能激光雷达。我们的软件包解决了许多关键问题：在非常有限的 FOV 中进行特征提取和选择、鲁棒的异常值抑制、移动对象过滤和运动失真补偿。此外，我们还集成了其他功能，如可并行管道、使用单元格和地图的点云管理、闭环、地图保存和重新加载实用程序</p>
-<h2 id="1-软件库"><a href="#1-软件库" class="headerlink" title="1.软件库"></a>1.软件库</h2><ul>
-<li><h3 id="ceres-1-14"><a href="#ceres-1-14" class="headerlink" title="ceres 1.14"></a>ceres 1.14</h3></li>
-<li><h3 id="pcl-1-9"><a href="#pcl-1-9" class="headerlink" title="pcl 1.9"></a>pcl 1.9</h3></li>
-<li><h3 id="vtk-8-2-0"><a href="#vtk-8-2-0" class="headerlink" title="vtk 8.2.0"></a>vtk 8.2.0</h3></li>
-</ul>
-<h2 id="2-构建"><a href="#2-构建" class="headerlink" title="2.构建"></a>2.构建</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd ~/catkin_ws/src</span><br><span class="line">git clone https://github.com/hku-mars/loam_livox.git</span><br><span class="line">cd ../</span><br><span class="line">catkin_make</span><br><span class="line">source ~/catkin_ws/devel/setup.bash</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-录制bag包"><a href="#3-录制bag包" class="headerlink" title="3.录制bag包"></a>3.录制bag包</h2><p>因为需要装很多库，所以没有在松灵小车上运行，而是先在小车上录制bag包，然后在PC端运行。</p>
-<p>3.1 运行livox雷达</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">roslaunch livox_ros_driver livox_lidar_rviz.launch</span><br></pre></td></tr></table></figure>
-
-<p>3.2 录制bag包</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosbag record /livox/lidar</span><br></pre></td></tr></table></figure>
-
-<h2 id="4-播放bag"><a href="#4-播放bag" class="headerlink" title="4.播放bag"></a>4.播放bag</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">roslaunch loam_livox rosbag.launch</span><br><span class="line">rosbag play YOUR_DOWNLOADED.bag</span><br><span class="line">#rosbag play loop.bag</span><br></pre></td></tr></table></figure>
-
+<p>如果<strong>v</strong>是$R^3$中的向量，<strong>k</strong>是描述旋转轴的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Unit_vector">单位向量</a>，根据<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Right_hand_rule#Direction_associated_with_a_rotation">右手定则</a><strong>v</strong>围绕该旋转轴旋转角度θ ，旋转向量的$V_{rot}$罗德里格斯公式为</p>
+<p>​        $$V_{rot}&#x3D; \cos\theta V +  (1-\cos\theta)(V \cdot K)K + \sin\theta K\times V$$</p>
+<h2 id="推导"><a href="#推导" class="headerlink" title="推导"></a>推导</h2><p><img src="/%E7%BD%97%E5%BE%B7%E9%87%8C%E6%A0%BC%E6%96%AF%E5%85%AC%E5%BC%8F.assets/300px-Rodrigues-formula.svg.png" alt="img"></p>
+<p>​																				图一</p>
+<p>令<strong>k</strong>为定义旋转轴的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Unit_vector">单位向量</a>，令<strong>v</strong>为围绕<strong>k</strong>旋转角度<em>θ</em>的任意向量（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Right_hand_rule">右手</a>定则，图中逆时针方向）。</p>
+<p>使用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dot_product">点</a>积和<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Cross_product">叉积</a>，向量<strong>v</strong>可以分解为平行和垂直于轴<strong>k</strong>的分量</p>
+<p>$$V &#x3D; V_ \parallel + V_ \perp $$</p>
+<p>其中与$K$平行的分量是:$$V_ \parallel &#x3D; (V \cdot K)K $$ ,</p>
+<p>$V_ \parallel $看作向量<strong>v</strong>在轴<strong>k</strong>上的投影。</p>
+<p>$$ V_ \perp &#x3D; V - V_ \parallel &#x3D; V - (V \cdot K)K &#x3D; -K\times(K\times V)$$</p>
+<p>其中，最后一个等号的推导如下：</p>
+<p>　　回顾叉积的知识，$$K \times V &#x3D; K \times (V_\parallel + V_\perp) &#x3D; 0 + K \times V_\perp &#x3D; K \times V_\perp  $$，$K \times V$可以看做将$V_\perp$以$K$为旋转轴逆时针旋转了90°（可参考图1来理解）。正如图2所示，$V$分解为$V_\parallel$和$V_\perp$，用右手法则不难确定出$K \times V$的方向，进而不难发现$K\times(K\times V)$可以看作将$V_\perp$以$K$为旋转轴逆时针旋转了180°，图中的圆正反映了$K\times(K\times V)$、$K\times V$、$V_\perp$ 三者大小相等的关系，最终，可知$ V_ \perp &#x3D;&#x3D; -K\times(K\times V)$。</p>
+<p><img src="/%E7%BD%97%E5%BE%B7%E9%87%8C%E6%A0%BC%E6%96%AF%E5%85%AC%E5%BC%8F.assets/350px-Orthogonal_decomposition_unit_vector_rodrigues_rotation_formula.svg.png" alt="img"></p>
+<p>从图1还可以看出，<strong>v</strong>的平行分量$V_\parallel$不会因为旋转而改变，旋转后的向量**$V_{rot}$**的平行分量依然等于$V_\parallel$，即$V_{\parallel rot} &#x3D; V_\parallel$。</p>
+<p>而<strong>v</strong>的正交分量$ V_\perp$在旋转过程中大小不变，方向会发生变化，即</p>
+<p>$$|V_{\perp rot}| &#x3D;| V_\perp|$$</p>
+<p>$$V_{\perp rot} &#x3D; \cos\theta V_\perp + \sin\theta K\times V_\perp &#x3D;  \cos\theta V_\perp + \sin\theta K\times V $$</p>
+<p>上式的解释，因为向量$V_\perp$和具$K \times V$有相同的长度，并且$K \times V$是围$V_\perp$绕**$K$**逆时针旋转了90°。使用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Trigonometric_functions">三角函数</a><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Sine">sin</a>和<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Cosine">cos</a>对$V_\perp$和$K \times V$进行适当的缩放，得到旋转的垂直分量。</p>
+<p>到这已经得出罗德里格斯公式了：</p>
+<p>$$V_{rot} &#x3D; V_{\parallel rot} + V_{\perp rot}$$</p>
+<p>​		$$&#x3D; V_\parallel +  \cos\theta V_\perp + \sin\theta K\times V$$</p>
+<p>​        $$&#x3D; V_\parallel +  \cos\theta (V-V_\parallel) + \sin\theta K\times V$$</p>
+<p>​        $$&#x3D; \cos\theta V +  (1-\cos\theta)V_\parallel + \sin\theta K\times V$$</p>
+<p>​        $$&#x3D; \cos\theta V +  (1-\cos\theta)(V \cdot K)K + \sin\theta K\times V$$</p>
+<h2 id="矩阵形式"><a href="#矩阵形式" class="headerlink" title="矩阵形式"></a>矩阵形式</h2><p>　　在叉积部分提到过叉积可以表示为矩阵乘向量的形式，类似地，罗德里格斯旋转公式可以表示为旋转矩阵乘以向量的形式，$V_{rot} &#x3D; R V$，其中$R$是旋转矩阵。在slam14讲中的表示如下：</p>
+<p>$R &#x3D; \cos\theta I +(1-\cos\theta)KK^T+\sin\theta K^{\wedge}$</p>
+<p>其中，$I$表示单位矩阵，$K$表示旋转向量（书中用$n$表示旋转向量），$K^{\wedge}$表示由$K$得到的反对称矩阵。</p>
  
       <!-- reward -->
       
@@ -198,7 +208,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2023/04/05/LOAM_Livox_runing/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tguangchao.github.io/2022/03/27/2022-03-27-%E7%BD%97%E5%BE%B7%E9%87%8C%E6%A0%BC%E6%96%AF%E5%85%AC%E5%BC%8F/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -211,11 +221,11 @@
    
   <nav class="article-nav">
     
-      <a href="/2023/04/06/2_ORB%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96/" class="article-nav-link">
+      <a href="/2022/03/28/1_%E5%8D%95%E7%9B%AEorbslam2_%E8%BF%90%E8%A1%8C%E5%88%9D%E5%A7%8B%E5%8C%96/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            （二）ORB特征点提取
+            （一）单目orbslam2 运行初始化
           
         </div>
       </a>
@@ -228,56 +238,34 @@
     
   </nav>
 
+  
    
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "",
-    app_key: "",
-    path: window.location.pathname,
-    avatar: "mp",
-    placeholder: "雁过留痕",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
+<div class="gitalk" id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.css">
+
+
+<script src="https://cdn.staticfile.org/gitalk/1.7.2/gitalk.min.js"></script>
+
+
+<script src="https://cdn.staticfile.org/blueimp-md5/2.19.0/js/md5.min.js"></script>
+
+<script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '',
+    clientSecret: '',
+    repo: '',
+    owner: '',
+    admin: [''],
+    // id: location.pathname,      // Ensure uniqueness and length less than 50
+    id: md5(location.pathname),
+    distractionFreeMode: false,  // Facebook-like distraction free mode
+    pagerDirection: 'last'
+  })
+
+  gitalk.render('gitalk-container')
 </script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
 
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
-   
   
    
     <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
@@ -546,6 +534,30 @@
     viewer_init()
 </script> 
 <!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/MathJax.js"></script>
+<script src="https://cdn.staticfile.org/mathjax/2.7.7/config/TeX-AMS-MML_HTMLorMML-full.js"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
 
 <!-- Katex -->
 
